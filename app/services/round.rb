@@ -19,15 +19,12 @@ class Round < Struct.new(:game)
   # If the deck is size 20 after the first shuffle
   # the second shuffle will be at 72 pickups!
   def prepare_shuffled_pile
-    shuffle_count = game.pickups.count / Deck::PLATONIC.size
+    shuffle_count = game.shuffles.count
 
     if shuffle_count.zero?
       # If we've not shuffled, just show all cards played
       game.plays.in_order.map(&:card)
     else
-      # Find the card that triggered the shuffle
-      @shuffle_trigger = game.pickups.in_order[ Deck::PLATONIC.size * shuffle_count - 1 ]
-
       # Otherwise, we need previous pile's top card + played cards since then
       previous_top_card.concat played_since_shuffle
     end
@@ -38,12 +35,17 @@ class Round < Struct.new(:game)
   end
 
   def plays_before_shuffle
-     game.plays.in_order.where("actions.id < ?", @shuffle_trigger.id).map(&:card)
+     game.plays.in_order.where("actions.id < ?", shuffle_trigger.id).map(&:card)
   end
 
   def played_since_shuffle
-    game.plays.in_order.where("actions.id > ?", @shuffle_trigger.id).map(&:card)
+    game.plays.in_order.where("actions.id > ?", shuffle_trigger.id).map(&:card)
   end
+
+  def shuffle_trigger
+    game.shuffles.last
+  end
+
 
   def cards_in_play
     pile + hands.values.flatten

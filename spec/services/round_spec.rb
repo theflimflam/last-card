@@ -119,55 +119,40 @@ RSpec.describe Round do
       end
     end
 
-    context "when deck is ready for reshuffle" do
-      let(:top_card)    { hand.first }
-      let(:last_round)  { round }
+    context "after shuffle" do
+      let(:last_played_card)          {  hand.first }
+      let(:second_to_last_played_card) { hand.last }
 
       before do
-        # player plays a card
-        player.play!(top_card)
-
-        # player picks up all cards
-        last_round.deck.each do |card|
-          player.pickup!(card)
-        end
+        player.play!(second_to_last_played_card)
+        player.play!(last_played_card)
+        player.shuffle!
       end
 
       describe "the pile" do
         it "gets emptied of all but 1 card" do
-          expect(round.pile.size).to be 1
+          expect(round.pile.size).to eq 1
         end
 
-        # TODO options concept
-        # TODO concepts for rules
-        # TODO concept for shuffle rule
-        #  - When am I going to shuffle
-        #  - Abstract this from the round service
-        #  - Make the round service take advantage of this shuffle rule
-        #  - Move these integration tests to work against the rule rather than the round
-        #
-        # Because the shuffle rules are mission critical to the game
-        # we should be using unit tests on them to be more sure of their correctness
-        # Integration tests cannot cover edge cases of the application :)
         it "keeps the last card played on the top" do
-          expect(round.pile.top).to eq last_round.pile.top
+          expect(round.pile.top).to eq last_played_card
         end
       end
 
       describe "the deck" do
-        it "shuffles in cards from the pile" do
-          expect(round.deck.size).to be 1
+        it "now has cards" do
+          expect(round.deck).to_not be_empty
         end
 
         it "contains the first card played by the dealer" do
-          expect(round.deck).to include last_round.pile.first
+          expect(round.deck).to include second_to_last_played_card
         end
       end
 
       context "the next play" do
-        let(:next_played_card) { hand.last }
+        let(:played_card_after_shuffle) { hand.last }
 
-        before { player.play!(next_played_card) }
+        before { player.play!(played_card_after_shuffle) }
 
         describe "the pile" do
           it "has 2 cards" do
@@ -175,25 +160,15 @@ RSpec.describe Round do
           end
 
           it "still has the last play from before shuffle" do
-            expect(round.pile.first).to eq last_round.pile.top
+            expect(round.pile).to include last_played_card
           end
 
           it "now shows the played card on top of the pile" do
-            expect(round.pile.top).to eq next_played_card
-          end
-        end
-
-        describe "the deck" do
-          it "still only has cards from previous pile" do
-            expect(round.deck.size).to be 1
-          end
-
-          it "contains the first card played by the dealer" do
-            expect(round.deck).to include last_round.pile.first
+            expect(round.pile.top).to eq played_card_after_shuffle
           end
 
           it "does not contain the card just played" do
-            expect(round.deck).to_not include next_played_card
+            expect(round.deck).to_not include played_card_after_shuffle
           end
         end
       end
