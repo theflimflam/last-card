@@ -79,17 +79,25 @@ RSpec.describe PickupCards do
         expect { subject }.to change { player1.pickups.count }.by 5
       end
 
-      #context "with deck of 2 cards" do
-      #  it "picks up 2 from deck, 3 from shuffled pile"
+      context "with deck of 2 cards" do
+        before do
+          round.deck[0...-2].each { |card| player2.pickup!(card) }
+        end
 
-      #  context "with a pile of 2 cards" do
-      #    it "picks up 2 from deck, 1 from shuffled pile"
-      #  end
+        it "will create a shuffle action" do
+          expect { subject }.to change { game.shuffles.count }.by 1
+        end
 
-      #  context "with pile of 1 card" do
-      #    it "only picks up 2 cards"
-      #  end
-      #end
+        #it "picks up 2 from deck, 3 from shuffled pile"
+
+        #context "with a pile of 2 cards" do
+        #  it "picks up 2 from deck, 1 from shuffled pile"
+        #end
+
+        #context "with pile of 1 card" do
+        #  it "only picks up 2 cards"
+        #end
+      end
     end
   end
 end

@@ -18,6 +18,6 @@ class Player < ActiveRecord::Base
   end
 
   def shuffle!
-    actions.shuffle.create!
+    shuffles.create!
   end
 end
