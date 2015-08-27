@@ -10,11 +10,11 @@ class Player < ActiveRecord::Base
   delegate :plays, :pickups, :shuffles, to: :actions
 
   def pickup!(card)
-    actions.pickups.create!(card: card)
+    pickups.create!(card: card)
   end
 
   def play!(card)
-    actions.plays.create!(card: card)
+    plays.create!(card: card)
   end
 
   def shuffle!
