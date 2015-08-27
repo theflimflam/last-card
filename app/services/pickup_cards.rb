@@ -21,8 +21,10 @@ class PickupCards < Struct.new(:player, :round, :card_count)
   end
 
   def pickup_card
-    card = round.deck.pickup
-    player.pickup!(card)
+    card_count.times do
+      card = round.deck.pickup
+      player.pickup!(card)
+    end
   end
 
   # TODO increment round fool!

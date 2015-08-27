@@ -58,24 +58,25 @@ RSpec.describe PickupCards do
       it_behaves_like "a service with errors"
     end
 
-    # TODO does this belong here?
-    # TODO this seems to imply the shuffle service needs to exist
-    #context "pickup 5" do
-    #  subject { serice.call }
-    #
-    #  it "picks up 5 cards"
-    #
-    #  context "with deck of 2 cards" do
-    #    it "picks up 2 from deck, 3 from shuffled pile"
-    #
-    #    context "with a pile of 2 cards" do
-    #      it "picks up 2 from deck, 1 from shuffled pile"
-    #    end
-    #
-    #    context "with pile of 1 card" do
-    #      it "only picks up 2 cards"
-    #    end
-    #  end
-    #end
+    context "pickup 5" do
+      subject { service.call }
+      let(:card_count) { 5 }
+
+      it "picks up 5 cards" do
+        expect { subject }.to change { player1.pickups.count }.by 5
+      end
+
+      #context "with deck of 2 cards" do
+      #  it "picks up 2 from deck, 3 from shuffled pile"
+
+      #  context "with a pile of 2 cards" do
+      #    it "picks up 2 from deck, 1 from shuffled pile"
+      #  end
+
+      #  context "with pile of 1 card" do
+      #    it "only picks up 2 cards"
+      #  end
+      #end
+    end
   end
 end
