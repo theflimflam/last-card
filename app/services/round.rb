@@ -1,14 +1,14 @@
 class Round < Struct.new(:game)
   def hands
-    @hands ||= calculate_hands
+    @hands ||= prepare_hands
   end
 
   def pile
-    @pile ||= calculate_shuffled_pile
+    @pile ||= prepare_shuffled_pile
   end
 
   def deck
-    @deck ||= calculate_deck
+    @deck ||= prepare_deck
   end
 
   private
@@ -18,7 +18,7 @@ class Round < Struct.new(:game)
   # which will not be 52 the second time
   # If the deck is size 20 after the first shuffle
   # the second shuffle will be at 72 pickups!
-  def calculate_shuffled_pile
+  def prepare_shuffled_pile
     shuffle_count = game.pickups.count / Deck::PLATONIC.size
 
     if shuffle_count.zero?
@@ -56,12 +56,12 @@ class Round < Struct.new(:game)
   # 2. Remove pickups
   #   ...try make this work with scopes
   #   ...do add indexes to make this fast
-  def calculate_deck
+  def prepare_deck
     deck_cards = Deck::PLATONIC - cards_in_play
     Deck.new(deck_cards)
   end
 
-  def calculate_hands
+  def prepare_hands
     game.players.each.with_object({}) do |player, hands|
       pickups = player.pickups.map(&:card)
       plays = player.plays.map(&:card)
