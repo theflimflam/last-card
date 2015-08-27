@@ -11,8 +11,8 @@ RSpec.describe PickupCards do
   let(:player1)  { optimus.players.create!(game: game) }
   let(:player2)  { megatron.players.create!(game: game) }
 
-  let(:card_count) { 1 }
-  let(:service)    { PickupCards.new(player1, round, card_count) }
+  let(:number_of_pickups) { 1 }
+  let(:service)    { PickupCards.new(player1, round, number_of_pickups) }
 
   def round
     Round.new(game)
@@ -60,7 +60,7 @@ RSpec.describe PickupCards do
 
     context "pickup 5" do
       subject { service.call }
-      let(:card_count) { 5 }
+      let(:number_of_pickups) { 5 }
 
       it "picks up 5 cards" do
         expect { subject }.to change { player1.pickups.count }.by 5
