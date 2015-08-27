@@ -4,7 +4,7 @@ class Round < Struct.new(:game)
   end
 
   def pile
-    @pile ||= prepare_shuffled_pile
+    @pile ||= Pile.new(prepare_shuffled_pile)
   end
 
   def deck
@@ -23,16 +23,14 @@ class Round < Struct.new(:game)
 
     if shuffle_count.zero?
       # If we've not shuffled, just show all cards played
-      pile_cards = game.plays.in_order.map(&:card)
+      game.plays.in_order.map(&:card)
     else
       # Find the card that triggered the shuffle
       @shuffle_trigger = game.pickups.in_order[ Deck::PLATONIC.size * shuffle_count - 1 ]
 
-      # Pile will be previous pile's top card + played cards since then
-      pile_cards = previous_top_card.concat played_since_shuffle
+      # Otherwise, we need previous pile's top card + played cards since then
+      previous_top_card.concat played_since_shuffle
     end
-
-    Pile.new(pile_cards)
   end
 
   def previous_top_card
