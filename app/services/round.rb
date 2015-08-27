@@ -8,7 +8,7 @@ class Round < Struct.new(:game)
   end
 
   def deck
-    @deck ||= prepare_deck
+    @deck ||= Deck.new(prepare_deck)
   end
 
   private
@@ -55,8 +55,7 @@ class Round < Struct.new(:game)
   #   ...try make this work with scopes
   #   ...do add indexes to make this fast
   def prepare_deck
-    deck_cards = Deck::PLATONIC - cards_in_play
-    Deck.new(deck_cards)
+    Deck::PLATONIC - cards_in_play
   end
 
   def prepare_hands
