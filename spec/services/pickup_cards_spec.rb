@@ -48,6 +48,10 @@ RSpec.describe PickupCards do
       expect { service.call }.to_not change { round.pile }
     end
 
+    it "increments the round" do
+      expect { service.call }.to change { game.round_counter }.by 1
+    end
+
     context "when there are no cards in the deck" do
       before do
         round.deck.each do |card|

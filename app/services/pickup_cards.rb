@@ -3,6 +3,7 @@ class PickupCards < Struct.new(:player, :round, :number_of_pickups)
     round.game.with_lock do
       validate_cards_available
       pickup_card if errors.none?
+      end_turn
     end
 
     errors.none?
@@ -27,5 +28,7 @@ class PickupCards < Struct.new(:player, :round, :number_of_pickups)
     end
   end
 
-  # TODO increment round fool!
+  def end_turn
+    round.game.round_counter += 1
+  end
 end
