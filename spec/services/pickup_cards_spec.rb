@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'set'
 require_relative 'shared_examples'
 
 RSpec.describe PickupCards do
@@ -86,6 +87,13 @@ RSpec.describe PickupCards do
 
         it "will create a shuffle action" do
           expect { subject }.to change { game.shuffles.count }.by 1
+        end
+
+        it "picks up the last 2 cards from the deck" do
+          deck_before_shuffle = Set.new(round.deck)
+          expect { subject }
+            .to change { Set.new(hand).intersect?(deck_before_shuffle) }
+            .to true
         end
 
         #it "picks up 2 from deck, 3 from shuffled pile"
