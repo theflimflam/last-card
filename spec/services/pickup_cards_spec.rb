@@ -60,6 +60,15 @@ RSpec.describe PickupCards do
       end
 
       it_behaves_like "a service with errors"
+
+      context "and you're asked to pickup 2 cards" do
+        let(:number_of_pickups) { 2 }
+        before { service.call }
+
+        it "doesn't double up on the errors" do
+          expect(service.errors.size).to eq service.errors.uniq.size
+        end
+      end
     end
 
     context "pickup 5" do

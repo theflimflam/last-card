@@ -1,7 +1,10 @@
 class PickupCards < Struct.new(:player, :round, :number_of_pickups)
   def call
     round.game.with_lock do
-      number_of_pickups.times { pickup_card }
+      number_of_pickups.times do
+        pickup_card
+        break if errors.any?
+      end
       end_turn
     end
 
