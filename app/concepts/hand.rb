@@ -1,3 +1,4 @@
+# TODO wrap array in PORO
 class Hand < Array
   def select_playable(top_card)
     select_from_hand { |card| card.playable_on?(top_card) }

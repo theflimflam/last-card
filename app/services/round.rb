@@ -18,6 +18,7 @@ class Round < Struct.new(:game)
   # which will not be 52 the second time
   # If the deck is size 20 after the first shuffle
   # the second shuffle will be at 72 pickups!
+  # TODO don't say shuffle!
   def prepare_shuffled_pile
     shuffle_count = game.shuffles.count
 

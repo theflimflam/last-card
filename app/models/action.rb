@@ -7,6 +7,8 @@ class Action < ActiveRecord::Base
 
   composed_of :card, class_name: "Card", mapping: [%w(card_rank rank), %w(card_suit suit)]
 
+  # Read this and break up class :)
+  # http://eewang.github.io/blog/2013/03/12/how-and-when-to-use-single-table-inheritance-in-rails/
   scope :pickups,  -> { where(effect: PICKUP) }
   scope :plays,    -> { where(effect: PLAY) }
   scope :shuffles, -> { where(effect: SHUFFLE) }
@@ -23,4 +25,5 @@ class Action < ActiveRecord::Base
   def this_triggered_shuffle?
     effect == SHUFFLE
   end
+  # TODO wrap array in PORO
 end
