@@ -7,6 +7,7 @@ class Game < ActiveRecord::Base
   has_many :actions, through: :players
   delegate :plays, :pickups, :shuffles, to: :actions
 
+  # TODO not null this field
   validates :round_counter, numericality: { only_integer: true }
 
   # TODO should a user kill themselves
