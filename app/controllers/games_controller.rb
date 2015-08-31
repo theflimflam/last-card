@@ -1,6 +1,10 @@
 class GamesController < ApplicationController
   before_filter :lookup_user
 
+  def new
+    redirect_to Game.create!
+  end
+
   def index
     @games = Game.where(pending: true)
   end
@@ -8,10 +12,6 @@ class GamesController < ApplicationController
   def show
     @game = game
     @player = player
-  end
-
-  def new
-    redirect_to Game.create!
   end
 
   private
