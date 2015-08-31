@@ -7,6 +7,9 @@ $(document).ready(function() {
   var SEED = new Date().getTime() * Math.random();
   var TRANSITION_TIME = 750; // ms
 
+  var MINIMUM_CARD_ANGLE = 3; // degrees
+  var MAXIMUM_CARD_ANGLE = 10; // degrees
+
   d3.json(document.location + '/rounds')
     .header('Content-Type', 'application/json')
     .get(initGame)
@@ -19,7 +22,7 @@ $(document).ready(function() {
 
     var cards = svg.selectAll('.card').data(roundData, keyedByCard);
 
-    // Render nerw cards with rectangles
+    // Create svg elements for new cards
     cards.enter()
       .append('image').classed('card', true)
         .attr('xlink:href', cardImageUrl)
@@ -128,14 +131,31 @@ $(document).ready(function() {
   function positionHand(cards) {
     var count = cards[0].length;
     var middle = parseFloat(count, 10) / 2;
-    var baseAngle = 1/count * 45 - 90; // fan out in a V
+    var fanAngle = calculateHandFanAngle(count);
+    var startAngle = (fanAngle * count) / 2
 
     return function fanOutCard(card, i) {
-      var angle = (i - middle) * baseAngle;
-      var position = 'translate(500,700)';
-      var rotate = 'rotate(' + angle + ', ' + (CARD_WIDTH/2) + ', '+ -CARD_HEIGHT+')';
-      return [position, rotate].join(' ');
+      var angle = (i * fanAngle) - startAngle;
+      var selectionMultiplier = (card.selected ? -1.2 : -1);
+      var position = 'translate(300,300)';
+      var rotate = 'rotate(' + angle + ', ' + (CARD_WIDTH/2) + ', ' + (CARD_HEIGHT/2) + ')';
+      var pushOut = 'translate(0,' + (CARD_HEIGHT * selectionMultiplier) + ')';
+      return [position, rotate, pushOut].join(' ');
     };
+  }
+
+  function calculateHandFanAngle(count) {
+    var angle = 90 / count;
+
+    if (angle > MAXIMUM_CARD_ANGLE) {
+      return MAXIMUM_CARD_ANGLE;
+    }
+    else if (angle < MINIMUM_CARD_ANGLE) {
+      return MINIMUM_CARD_ANGLE;
+    }
+    else {
+      return angle;
+    }
   }
 
   var svg = d3.select('#table')
