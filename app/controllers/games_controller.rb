@@ -10,18 +10,28 @@ class GamesController < ApplicationController
   end
 
   def show
-    @game = game
-    @player = player
+    game.with_lock do
+      find_or_create_player
+    end
+  end
+
+  def update
+    # Set player readiness
+    player.ready = !!update_params.ready
+
+    if player.ready? && game.ready? && game.players.map(&:ready?).all?
+      start_game.call or raise "Game failed to start: #{start_game.errors.to_sentence}"
+    end
   end
 
   private
 
-  def player
-    @game.players.find_or_create_by(user: @user)
+  def game
+    @game ||= Game.find(params[:id])
   end
 
-  def game
-    Game.find(params[:id])
+  def find_or_create_player
+    @player ||= game.players.find_or_create_by(user: @user)
   end
 
   def lookup_user
@@ -30,5 +40,13 @@ class GamesController < ApplicationController
     end
   rescue ActiveRecord::RecordNotFound
     @user = nil # so user isn't logged in after all
+  end
+
+  def update_params
+    params.require(:ready)
+  end
+
+  def start_game
+    @start_game ||= StartGame.new(game)
   end
 end

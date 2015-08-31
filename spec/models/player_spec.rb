@@ -32,5 +32,18 @@ RSpec.describe Player, type: :model do
         expect { subject }.not_to change { player.pickups.count }
       end
     end
+
+    context "setting readyness" do
+      it "defaults to not ready" do
+        expect(player.ready).to be false
+        expect(player.ready?).to be false
+      end
+
+      it "sets #ready? when ready" do
+        player.ready = true
+        expect(player.ready?).to be true
+      end
+    end
+
   end
 end

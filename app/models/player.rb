@@ -20,4 +20,8 @@ class Player < ActiveRecord::Base
   def shuffle!
     shuffles.create!
   end
+
+  def ready?
+    ready
+  end
 end

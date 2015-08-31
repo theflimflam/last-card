@@ -77,4 +77,31 @@ RSpec.describe GamesController, type: :controller do
       expect(response).to render_template('index')
     end
   end
+
+  describe "PUT update" do
+    # TODO
+    # let(:game) { Game.create! }
+    # let(:user1) { User.create!(email: "a@a.a") }
+    # let(:user2) { User.create!(email: "b@b.b") }
+
+    # before { game.players.create!(user: user1) }
+
+    # context "when there is only one player" do
+    #   it "doesn't start the game" do
+    #     expect().to raise
+    #   end
+    # end
+
+    # context "when there are 2 players" do
+    #   before { game.players.create!(user: user2) }
+
+    #   context "where one player is ready" do
+    #     it ""
+    #   end
+
+    #   context "when both players are ready" do
+    #     it "starts the game"
+    #   end
+    # end
+  end
 end
