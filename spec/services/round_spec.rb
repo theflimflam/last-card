@@ -120,7 +120,7 @@ RSpec.describe Round do
     end
 
     context "after shuffle" do
-      let(:last_played_card)          {  hand.first }
+      let(:last_played_card) { hand.first }
       let(:second_to_last_played_card) { hand.last }
 
       before do
