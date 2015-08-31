@@ -103,10 +103,7 @@ $(document).ready(function() {
   }
 
   function positionDeck(cards) {
-    var random = seedRandom(SEED);
-
-    return function(c, i) {
-      var offset = i / 2;
+    return function(c, offset) {
       var position = 'translate(50,0)';
       var stack = 'translate(' + offset + ',' + offset + ')';
       var perspective = 'skewX(-10) skewY(10)';
