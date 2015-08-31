@@ -74,7 +74,7 @@ $(document).ready(function() {
     return '#'+((1<<24)*Math.random()|0).toString(16);
   }
 
-  function seedRandom(seed) { 
+  function seedRandom(seed) {
     return function myRandom() {
       var x = Math.sin(seed++) * 10000;
       return x - Math.floor(x);
