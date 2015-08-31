@@ -34,11 +34,10 @@ $(document).ready(function() {
     ;
 
     cards.attr('transform', positionHand(cards));
-    //cards.attr('transform', positionDeck(cards));
-    //
+
     cards.on('click', selectCard(cards));
 
-    //everythingFlysAround(cards);
+    everythingFlysAround(cards);
   }
 
   function selectCard(cards) {
@@ -86,10 +85,6 @@ $(document).ready(function() {
     ')';
   }
 
-  function randomColor() {
-    return '#'+((1<<24)*Math.random()|0).toString(16);
-  }
-
   function seedRandom(seed) {
     return function myRandom() {
       var x = Math.sin(seed++) * 10000;
@@ -121,7 +116,7 @@ $(document).ready(function() {
     ;
   }
 
-  function positionDeck(cards) {
+  function positionDeck() {
     return function(c, offset) {
       var position = 'translate(50,0)';
       var stack = 'translate(' + offset + ',' + offset + ')';
@@ -143,9 +138,8 @@ $(document).ready(function() {
 
   function positionHand(cards) {
     var count = cards[0].length;
-    var middle = parseFloat(count, 10) / 2;
     var fanAngle = calculateHandFanAngle(count);
-    var startAngle = (fanAngle * count) / 2
+    var startAngle = (fanAngle * count) / 2;
 
     return function fanOutCard(card, i) {
       var angle = (i * fanAngle) - startAngle;
