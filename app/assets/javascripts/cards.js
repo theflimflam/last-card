@@ -20,8 +20,8 @@ $(document).ready(function() {
       return console.error(error);
     }
 
-    var cards = svg.selectAll('.card').data(roundData, keyedByCard);
-    //var cards = svg.selectAll('.card').data(roundData.slice(0,20), keyedByCard);
+    //var cards = svg.selectAll('.card').data(roundData, keyedByCard);
+    var cards = svg.selectAll('.card').data(roundData.slice(0,10), keyedByCard);
 
     // Create svg elements for new cards
     cards.enter()
@@ -33,10 +33,22 @@ $(document).ready(function() {
         .attr('y',0)
     ;
 
-    //cards.attr('transform', positionHand(cards));
-    cards.attr('transform', positionDeck(cards));
+    cards.attr('transform', positionHand(cards));
+    //cards.attr('transform', positionDeck(cards));
+    //
+    cards.on('click', selectCard(cards));
 
-    everythingFlysAround(cards);
+    //everythingFlysAround(cards);
+  }
+
+  function selectCard(cards) {
+    return function clickHandler(card) {
+      // Toggle card selection
+      card.selected = !card.selected;
+
+      //transitionFlickOut(cards)
+      transitionSelect(cards).attr('transform', positionHand(cards));
+    };
   }
 
   function everythingFlysAround(cards) {
@@ -99,6 +111,13 @@ $(document).ready(function() {
       .delay(staggeredDelay(TRANSITION_TIME, cardCount)) // stagger transitions over a second
       .duration(TRANSITION_TIME)                         // transition over 1/2 a second
       .ease('exp-in-out')                                // as if the user flicked it into the table
+    ;
+  }
+
+  function transitionSelect(cards) {
+    return cards.transition()
+      .duration(100)
+      .ease('linear')
     ;
   }
 
