@@ -21,6 +21,7 @@ $(document).ready(function() {
     }
 
     var cards = svg.selectAll('.card').data(roundData, keyedByCard);
+    //var cards = svg.selectAll('.card').data(roundData.slice(0,20), keyedByCard);
 
     // Create svg elements for new cards
     cards.enter()
@@ -32,10 +33,10 @@ $(document).ready(function() {
         .attr('y',0)
     ;
 
-    //cards.attr('transform', positionDeck(cards));
-    cards.attr('transform', positionHand(cards));
+    //cards.attr('transform', positionHand(cards));
+    cards.attr('transform', positionDeck(cards));
 
-    //everythingFlysAround(cards);
+    everythingFlysAround(cards);
   }
 
   function everythingFlysAround(cards) {
@@ -102,18 +103,14 @@ $(document).ready(function() {
   }
 
   function positionDeck(cards) {
-    var cardCount = cards[0].length;
     var random = seedRandom(SEED);
 
     return function(c, i) {
-      var offset = cardCount + i;
-      var angle = random() * 4 - 2;
-
-      var position = 'translate(50,50)';
+      var offset = i / 2;
+      var position = 'translate(50,0)';
       var stack = 'translate(' + offset + ',' + offset + ')';
-      var slightRotation = rotateCardTransform(angle);
       var perspective = 'skewX(-10) skewY(10)';
-      return [position, stack, slightRotation, perspective].join(' ');
+      return [position, stack, perspective].join(' ');
     };
   }
 
