@@ -11,6 +11,11 @@ class Round < Struct.new(:game)
     @deck ||= Deck.new(prepare_deck)
   end
 
+  def reset
+    @hands, @deck, @pile = nil, nil, nil
+    game.reload
+  end
+
   private
 
   # FIXME 52 pickups is fine for the first shuffle
@@ -44,7 +49,7 @@ class Round < Struct.new(:game)
   end
 
   def shuffle_trigger
-    game.shuffles.last
+    game.shuffles.in_order.last
   end
 
 

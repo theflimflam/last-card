@@ -2,12 +2,13 @@ class PickupCards < Struct.new(:player, :round, :number_of_pickups)
   def call
     round.game.with_lock do
       number_of_pickups.times do
-        pickup_card
+        try_pickup_card
 
         break if errors.any?
 
         shuffle_deck_into_pile if deck_is_empty?
       end
+
       end_turn!
     end
 
@@ -20,13 +21,17 @@ class PickupCards < Struct.new(:player, :round, :number_of_pickups)
 
   private
 
-  def pickup_card
+  def try_pickup_card
     if round.deck.any?
-      card = round.deck.pickup
-      player.pickup!(card)
+      pickup_card
     else
       errors.push "no cards in deck"
     end
+  end
+
+  def pickup_card
+    card = round.deck.pickup
+    player.pickup!(card)
   end
 
   def end_turn!
@@ -39,7 +44,7 @@ class PickupCards < Struct.new(:player, :round, :number_of_pickups)
   end
 
   def shuffle_deck_into_pile
-    # TODO udpate round
     player.shuffle!
+    round.reset
   end
 end
