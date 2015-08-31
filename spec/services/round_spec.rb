@@ -172,6 +172,14 @@ RSpec.describe Round do
           end
         end
       end
+
+      context "when cards have come arond more than once" do
+        it "can still be used in a players hand" do
+          expect { player.pickup!(second_to_last_played_card) }
+            .to change { hand }
+            .to include second_to_last_played_card
+        end
+      end
     end
   end
 

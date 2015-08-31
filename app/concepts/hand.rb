@@ -9,6 +9,15 @@ class Hand < Array
       .select_from_hand { |card| card.pickup? || card.block? }
   end
 
+  def without(cards)
+    cards.each do |card|
+      card_index = index(card)
+      delete_at(card_index) if card_index
+    end
+
+    self # chainable
+  end
+
   protected
 
   def select_from_hand(&block)
