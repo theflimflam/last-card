@@ -1,9 +1,10 @@
 class Action < ActiveRecord::Base
-  PICKUP = 'pickup'
-  PLAY = 'play'
-  SHUFFLE = 'shuffle'
-  END_TURN = 'end_turn'
+  PICKUP     = 'pickup'
+  PLAY       = 'play'
+  SHUFFLE    = 'shuffle'
+  END_TURN   = 'end_turn'
   START_GAME = 'start_game'
+  READY      = 'ready'
 
   belongs_to :player
 
@@ -19,7 +20,7 @@ class Action < ActiveRecord::Base
   scope :in_order, -> { order(:id) }
 
   validates :player, presence: true
-  validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE, START_GAME, END_TURN ] }
+  validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE, START_GAME, END_TURN, READY ] }
 
   validates :card_suit, inclusion: { in: Card::SUITS }, if: :pickup_or_play?
   validates :card_rank, inclusion: { in: Card::RANKS }, if: :pickup_or_play?

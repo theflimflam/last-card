@@ -35,15 +35,32 @@ RSpec.describe Player, type: :model do
 
     context "setting readyness" do
       it "defaults to not ready" do
-        expect(player.ready).to be false
         expect(player.ready?).to be false
       end
 
-      it "sets #ready? when ready" do
-        player.ready = true
-        expect(player.ready?).to be true
+      context "when player has set ready" do
+        subject { player.ready! }
+
+        it "flags #ready?" do
+          expect { subject }.to change { player.ready? }.to true
+        end
+
+        it "creates ready actions" do
+          expect { subject }.to change { player.actions.count }.by 1
+        end
+
+        context "for players who hit ready twice" do
+          before { subject }
+
+          it "only creates one new ready action" do
+            expect { subject }.to_not change { player.actions.count }
+          end
+
+          it "lets the player stay ready" do
+            expect { subject }.to_not change { player.ready? }.from true
+          end
+        end
       end
     end
-
   end
 end

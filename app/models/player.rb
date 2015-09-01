@@ -22,10 +22,20 @@ class Player < ActiveRecord::Base
   end
 
   def end_turn!
-    actions.create!(effect: Action::END_TURN)
+    with_lock do
+      actions.create!(effect: Action::END_TURN)
+    end
+  end
+
+  def ready!
+    with_lock do
+      if !ready?
+        actions.create!(effect: Action::READY)
+      end
+    end
   end
 
   def ready?
-    ready
+    actions.where(effect: Action::READY).count > 0
   end
 end
