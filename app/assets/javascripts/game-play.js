@@ -1,7 +1,7 @@
-/* global $, d3 */
+/* global window, $, d3 */
 /* eslint-disable no-console */
 
-$(document).ready(function() {
+window.ignition = (function() {
   var CARD_HEIGHT = 150;
   var CARD_WIDTH = 100;
   var SEED = new Date().getTime() * Math.random();
@@ -10,15 +10,15 @@ $(document).ready(function() {
   var MINIMUM_CARD_ANGLE = 3; // degrees
   var MAXIMUM_CARD_ANGLE = 10; // degrees
 
-  d3.json(document.location + '/rounds')
-    .header('Content-Type', 'application/json')
-    .get(initGame)
-  ;
-
   function initGame(error, roundData) {
     if(error) {
       return console.error(error);
     }
+
+    var svg = d3.select('#table')
+      .attr('height', '100%')
+      .attr('width', '100%')
+    ;
 
     //var cards = svg.selectAll('.card').data(roundData, keyedByCard);
     var cards = svg.selectAll('.card').data(roundData.slice(0,10), keyedByCard);
@@ -69,6 +69,7 @@ $(document).ready(function() {
     render();
     setInterval(render, 6000);
   }
+
   function keyedByCard(card) {
     return [card.rank, card.suit].join(',');
   }
@@ -165,8 +166,13 @@ $(document).ready(function() {
     }
   }
 
-  var svg = d3.select('#table')
-    .attr('height', '100%')
-    .attr('width', '100%')
-  ;
-});
+  return {
+    start: function() {
+      console.log('asdfljafdassadfkajdas');
+      d3.json(document.location + '/rounds')
+        .header('Content-Type', 'application/json')
+        .get(initGame)
+      ;
+    }
+  };
+})();
