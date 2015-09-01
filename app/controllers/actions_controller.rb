@@ -1,8 +1,8 @@
 class ActionsController < ApplicationController
   def index
-    last_checked = index_params.since
-    if last_checked
-      game.actions.since(last_checked)
+    last_time = index_params.since
+    if last_time
+      game.actions.since(last_time)
     else
       game.actions
     end
