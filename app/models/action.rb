@@ -2,6 +2,7 @@ class Action < ActiveRecord::Base
   PICKUP = 'pickup'
   PLAY = 'play'
   SHUFFLE = 'shuffle'
+  START_GAME = 'start_game'
 
   belongs_to :player
 
@@ -15,15 +16,15 @@ class Action < ActiveRecord::Base
   scope :in_order, -> { order(:id) }
 
   validates :player, presence: true
-  validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE ] }
+  validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE, START_GAME ] }
 
-  validates :card_suit, inclusion: { in: Card::SUITS }, unless: :this_triggered_shuffle?
-  validates :card_rank, inclusion: { in: Card::RANKS }, unless: :this_triggered_shuffle?
+  validates :card_suit, inclusion: { in: Card::SUITS }, if: :pickup_or_play?
+  validates :card_rank, inclusion: { in: Card::RANKS }, if: :pickup_or_play?
 
   private
 
-  def this_triggered_shuffle?
-    effect == SHUFFLE
+  def pickup_or_play?
+    effect == PICKUP || effect == PLAY
   end
   # TODO wrap array in PORO
 end

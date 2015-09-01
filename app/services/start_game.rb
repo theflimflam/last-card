@@ -33,7 +33,9 @@ class StartGame
     elsif !@game.pending
       @errors.push "game already started"
     else
-      return @game.update!(pending: false)
+      # TODO remove pending from game
+      @game.update!(pending: false)
+      dealer.actions.create!(effect: Action::START_GAME)
     end
   end
 
@@ -55,9 +57,11 @@ class StartGame
 
   def play_first_card!
     first_card = @deck.pop
-    dealer = @game.players.first
-
     dealer.pickup!(first_card)
     dealer.play!(first_card)
+  end
+
+  def dealer
+    @game.players.first
   end
 end
