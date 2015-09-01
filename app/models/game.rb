@@ -7,9 +7,6 @@ class Game < ActiveRecord::Base
   has_many :actions, through: :players
   delegate :plays, :pickups, :shuffles, to: :actions
 
-  # TODO not null this field
-  validates :round_counter, numericality: { only_integer: true }
-
   # TODO should a user kill themselves
   # we should end the game
 
@@ -22,7 +19,7 @@ class Game < ActiveRecord::Base
   end
 
   def current_player
-    turn = round_counter % players.count
-    players[turn]
+    turn_counter = actions.turns.count
+    players[turn_counter % players.count]
   end
 end

@@ -31,7 +31,7 @@ class PlayCards < Struct.new(:player, :round, :cards)
   end
 
   def increment_round!
-    round.game.round_counter += 1
+    player.end_turn!
     round.game.save!
   end
 
