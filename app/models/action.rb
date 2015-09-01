@@ -17,6 +17,8 @@ class Action < ActiveRecord::Base
   scope :shuffles, -> { where(effect: SHUFFLE) }
   scope :turns,    -> { where(effect: END_TURN) }
 
+  scope :since, ->(id) { where('actions.id > ?', id) }
+
   scope :in_order, -> { order(:id) }
 
   validates :player, presence: true

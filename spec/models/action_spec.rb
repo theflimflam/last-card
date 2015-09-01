@@ -99,4 +99,30 @@ RSpec.describe Action, type: :model do
       end
     end
   end
+
+  describe "#since" do
+    let(:action1) { player.actions.build(effect: Action::SHUFFLE) }
+    let(:action2) { player.actions.build(effect: Action::SHUFFLE) }
+
+    before do
+      action1.save!
+      action2.save!
+    end
+
+    it "doesn't include action searched for" do
+      expect(game.actions.since(action1.id)).to_not include action1
+    end
+
+    it "shows actions since specified id" do
+      expect(game.actions.since(action1.id)).to include action2
+    end
+
+    it "excludes actions that happened before specified id" do
+      expect(game.actions.since(action2.id)).to_not include action1
+    end
+
+    it "returns empty if nothing has happened since" do
+      expect(game.actions.since(action2.id)).to be_empty
+    end
+  end
 end
