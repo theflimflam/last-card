@@ -21,20 +21,16 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe "GET show" do
-    def request_for(game_id)
-      get :show, id: game_id
-    end
-
     it "explodes with negative game id" do
-      expect { request_for(-1) }.to raise_error ActiveRecord::RecordNotFound
+      expect { get :show, id: -1 }.to raise_error ActiveRecord::RecordNotFound
     end
 
     it "explodes with alpha game id" do
-      expect { request_for("fu") }.to raise_error ActiveRecord::RecordNotFound
+      expect { get :show, id: "fu" }.to raise_error ActiveRecord::RecordNotFound
     end
 
     it "explodes with non existant game id" do
-      expect { request_for(666) }.to raise_error ActiveRecord::RecordNotFound
+      expect { get :show, id: 666 }.to raise_error ActiveRecord::RecordNotFound
     end
 
     context "a game in progress" do
@@ -42,15 +38,27 @@ RSpec.describe GamesController, type: :controller do
       let(:megatron) { User.create!(email: "megatron@decepticons.com") }
       let(:optimus)  { User.create!(email: "optimus@autobots.com") }
 
-      before do
-        game.players.create!(user: megatron)
-        game.players.create!(user: optimus)
-        session[:user_id] = megatron.id
-      end
+      subject { get :show, id: game.id }
+      before { session[:user_id] = megatron.id }
 
       it "can find a game in progress" do
-        request_for(game.id)
+        subject
         expect(response).to render_template('show')
+      end
+
+      it "publishes a JOIN action" do
+        expect { subject }
+          .to change { Action.where(effect: Action::JOIN).count }
+          .by 1
+      end
+
+      it "created a new player" do
+        expect { subject }.to change { Player.count }.by 1
+      end
+
+      it "doesn't create a player on page refresh" do
+        subject
+        expect { subject }.to_not change { Player.count }
       end
     end
   end

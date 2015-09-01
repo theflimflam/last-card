@@ -13,5 +13,6 @@ Rails.application.routes.draw do
   resources :games do
     resources :pickups
     resources :rounds
+    resources :actions, only: :index
   end
 end

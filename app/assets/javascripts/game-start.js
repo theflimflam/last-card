@@ -9,9 +9,13 @@ $(document).ready(function() {
     $that.show();
   }
 
+  function waitTillGameStart() {
+  }
+
   function toggleReady() {
     show($ready);
-    setTimeout(startGame, 2000);
+
+    setTimeout(waitTillGameStart, 2000);
   }
 
   function startGame() {

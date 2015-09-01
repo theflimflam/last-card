@@ -31,7 +31,14 @@ class GamesController < ApplicationController
   end
 
   def find_or_create_player
-    @player ||= game.players.find_or_create_by(user: @user)
+    @player ||= game.players.find_by(user: @user)
+    @player ||= create_player
+  end
+
+  def create_player
+    player = game.players.create!(user: @user)
+    player.actions.create!(effect: Action::JOIN)
+    player
   end
 
   def lookup_user
@@ -39,7 +46,7 @@ class GamesController < ApplicationController
       @user ||= User.find(session[:user_id])
     end
   rescue ActiveRecord::RecordNotFound
-    @user = nil # so user isn't logged in after all
+    redirect_to 'sessions#destroy'
   end
 
   def update_params
