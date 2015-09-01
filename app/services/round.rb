@@ -1,4 +1,6 @@
 class Round < Struct.new(:game)
+  delegate :plays, :pickups, :shuffles, :players, to: :game
+
   def hands
     @hands ||= prepare_hands
   end
@@ -25,11 +27,11 @@ class Round < Struct.new(:game)
   # the second shuffle will be at 72 pickups!
   # TODO don't say shuffle!
   def prepare_shuffled_pile
-    shuffle_count = game.shuffles.count
+    shuffle_count = shuffles.count
 
     if shuffle_count.zero?
       # If we've not shuffled, just show all cards played
-      game.plays.in_order.map(&:card)
+      plays.in_order.map(&:card)
     else
       # Otherwise, we need previous pile's top card + played cards since then
       previous_top_card.concat played_since_shuffle
@@ -41,15 +43,15 @@ class Round < Struct.new(:game)
   end
 
   def plays_before_shuffle
-     game.plays.in_order.where("actions.id < ?", shuffle_trigger.id).map(&:card)
+     plays.in_order.where("actions.id < ?", shuffle_trigger.id).map(&:card)
   end
 
   def played_since_shuffle
-    game.plays.in_order.where("actions.id > ?", shuffle_trigger.id).map(&:card)
+    plays.in_order.where("actions.id > ?", shuffle_trigger.id).map(&:card)
   end
 
   def shuffle_trigger
-    game.shuffles.in_order.last
+    shuffles.in_order.last
   end
 
 
@@ -67,10 +69,10 @@ class Round < Struct.new(:game)
   end
 
   def prepare_hands
-    game.players.each.with_object({}) do |player, hands|
-      pickups = player.pickups.map(&:card)
-      plays = player.plays.map(&:card)
-      hands[player.id] = Hand.new(pickups).without(plays)
+    players.each.with_object({}) do |player, hands|
+      pickup_cards = player.pickups.map(&:card)
+      play_cards = player.plays.map(&:card)
+      hands[player.id] = Hand.new(pickup_cards).without(play_cards)
     end
   end
 
