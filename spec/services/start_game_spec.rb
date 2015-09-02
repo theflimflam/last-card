@@ -21,11 +21,17 @@ RSpec.describe StartGame do
     end
 
     context "more than once" do
+      let(:second_service) { StartGame.new(game) }
+
       before do
         game.users << user1
         game.users << user2
-        second_service = StartGame.new(game)
-        expect(second_service.call).to be true
+        second_service.call or raise "need to start game to test a second starting"
+      end
+
+      it "doesn't create new START_GAME actions" do
+        expect { service.call }
+          .to_not change { game.actions.where(effect: Action::START_GAME).count }
       end
 
       it_behaves_like "a service with errors"
@@ -37,35 +43,43 @@ RSpec.describe StartGame do
         game.users << user2
       end
 
+      subject { service.call }
+
       it "runs" do
-        expect(service.call).to be true
+        expect(subject).to be true
       end
 
       it "has no errors" do
-        expect { service.call }
+        expect { subject }
           .to_not change { service.errors.size }
       end
 
       it "is no longer #pending" do
-        expect { service.call }
+        expect { subject }
           .to change { game.pending }
           .from(true).to(false)
       end
 
+      it "creates a START_GAME action" do
+        expect { subject }
+          .to change { game.actions.where(effect: Action::START_GAME).count }
+          .by 1
+      end
+
       it "deals cards to users" do
-        expect { service.call }
+        expect { subject }
           .to change { Action.pickups.count - Action.plays.count }
           .from(0).to(10) # 10 cards in users hands
       end
 
       it "plays the first card on the deck" do
-        expect { service.call }
+        expect { subject }
           .to change { Action.plays.size }
           .from(0).to(1)
       end
 
       it "does not repeat delt cards to users" do
-        expect { service.call }
+        expect { subject }
           .to change { Action.pickups.map(&:card).uniq.size }
           .from(0).to(11) # 11 unique cards, 1 will be played
       end
