@@ -1,4 +1,6 @@
 class GamesController < ApplicationController
+  wrap_parameters format: %i(json xml url_encoded_form multipart_form)
+
   before_filter :lookup_user
 
   def new
