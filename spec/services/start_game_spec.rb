@@ -55,9 +55,7 @@ RSpec.describe StartGame do
       end
 
       it "is no longer #pending" do
-        expect { subject }
-          .to change { game.pending }
-          .from(true).to(false)
+        expect { subject }.to change { game.pending }.from(true).to(false)
       end
 
       it "creates a START_GAME action" do
