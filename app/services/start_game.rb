@@ -18,15 +18,6 @@ class StartGame
 
   private
 
-  def check_game_ready
-    if @game.ready?
-      true
-    else
-      @errors.push "game not ready to start"
-      false
-    end
-  end
-
   def flag_started!
     if !@game.ready?
       @errors.push "game not ready to start"
