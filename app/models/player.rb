@@ -6,7 +6,7 @@ class Player < ActiveRecord::Base
   validates :user, presence: true
   validates :game, presence: true
 
-  delegate :email, to: :user
+  delegate :name, to: :user
   delegate :plays, :pickups, :shuffles, to: :actions
 
   def pickup!(card)
