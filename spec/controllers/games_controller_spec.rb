@@ -4,9 +4,8 @@ RSpec.describe GamesController, type: :controller do
   render_views # needed for response.body tests
 
   # User logged in is megatron
-  let(:megatron) { User.create!(email: "megatron@decepticons.com") }
+  let(:megatron) { User.create!(email: "megatron@decepticons.co.nz") }
   before { session[:user_id] = megatron.id }
-
 
   describe "GET new" do
     it "creates a game after called" do
@@ -84,31 +83,60 @@ RSpec.describe GamesController, type: :controller do
     end
 
     describe "PUT update" do
-      # let(:game) { Game.create! }
-      # let(:user1) { User.create!(email: "a@a.a") }
-      # let(:user2) { User.create!(email: "b@b.b") }
+      subject { put :update, id: game.id, ready: true }
 
-      # before do
-      #   game.players.create!(user: user1)
-      # end
+      context "with one player" do
+        it "doesn't start the game" do
+          expect { subject }.to_not change { game.started? }.from false
+        end
 
-      # context "when there is only one player" do
-      #   it "doesn't start the game" do
-      #     expect().to raise
-      #   end
-      # end
+        it "still isn't #ready?" do
+          expect { subject }.to_not change { game.ready? }.from false
+        end
 
-      # context "when there are 2 players" do
-      #   before { game.players.create!(user: user2) }
+        it "still isn't #ready?" do
+          expect { subject }.to_not change { game.ready? }.from false
+        end
+      end
 
-      #   context "where one player is ready" do
-      #     it ""
-      #   end
+      context "with two players" do
+        let(:optimus) { User.create!(email: "optimus@autobots.com.au") }
+        let(:player) { megatron.players.find_by(game: game) }
+        let(:oponent) { optimus.players.find_by(game: game) }
 
-      #   context "when both players are ready" do
-      #     it "starts the game"
-      #   end
-      # end
+        before do # players have joined
+          game.players.create!(user: optimus)
+          game.players.create!(user: megatron)
+        end
+
+        it "shows game as #ready?" do
+          expect(game).to be_ready
+        end
+
+        it "creates ready action on post" do
+          expect { subject }
+            .to change { player.actions.where(effect: Action::READY).count }
+            .from(0).to(1)
+        end
+
+        it "doesn't affect other player's readyness on post" do
+          expect { subject }.to_not change { oponent.actions.where(effect: Action::READY).count }
+        end
+
+        context "when both players are ready" do
+          before { oponent.ready! }
+
+          it "removes game pending flag" do
+            expect { subject }.to change { game.reload.pending? }.from(true).to(false)
+          end
+
+          it "creates Action::START_GAME" do
+            expect { subject }
+              .to change { game.reload.actions.where(effect: Action::START_GAME).count }
+              .from(0).to(1)
+          end
+        end
+      end
     end
   end
 end

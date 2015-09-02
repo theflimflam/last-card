@@ -16,12 +16,18 @@ class GamesController < ApplicationController
   end
 
   def update
-    # Set player readiness
-    player.ready = !!update_params.ready
+    # TODO security risk?
+    if params[:ready]
+      find_or_create_player.ready!
 
-    if player.ready? && game.ready? && game.players.map(&:ready?).all?
-      start_game.call or raise "Game failed to start: #{start_game.errors.to_sentence}"
+      if game.ready? && game.players.map(&:ready?).all?
+        if !start_game.call
+          raise "Game failed to start: #{start_game.errors.to_sentence}"
+        end
+      end
     end
+
+    render_success
   end
 
   private
@@ -47,10 +53,6 @@ class GamesController < ApplicationController
     end
   rescue ActiveRecord::RecordNotFound
     redirect_to 'sessions#destroy'
-  end
-
-  def update_params
-    params.require(:ready)
   end
 
   def start_game
