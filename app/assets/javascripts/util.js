@@ -1,13 +1,9 @@
 /* global window */
 
 window.util = {
-  filterEffect: function filterEffect(interesting) {
-    function isInteresting(item) {
+  effect: function effect(interesting) {
+    return function filterEffect(item) {
       return item.effect === interesting;
-    }
-
-    return function filter(list) {
-      return list.filter(isInteresting);
     };
   },
   parameter: function parameter(parameter) {

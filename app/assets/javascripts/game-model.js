@@ -1,20 +1,41 @@
 /* eslint-disable no-console */
-function Game() {
-  this.players = [];
-}
-
-Game.prototype.players = function() { 
-  return this.players;
-};
-
-var playerName = function(player) {
-  return player.name;
-};
-
-Game.prototype.addPlayers = function addPlayers(players) {
-  if ( players.length > 0 ) {
-    console.log('New players %s', players.map(playerName).join(' '));
-    this.players = this.players.concat(players);
+(function() {
+  function Game() {
+    this.players = {};
+    this.currState = {};
   }
-  return this;
-};
+
+  function setPlayerReady(id) {
+    this.players[id].ready = true;
+  }
+
+  function addPlayer(player) {
+    this.players[player.id] = player;
+  }
+
+  Game.prototype.players = function() { 
+    return this.players;
+  };
+
+  function namesOf(newPlayers) {
+    return newPlayers
+      .map(function getName(player) { return player.name; })
+      .join(', ')
+    ;
+  }
+
+  Game.prototype.addPlayers = function addPlayers(newPlayers) {
+    if ( newPlayers.length > 0 ) {
+      console.log('Players: %s', namesOf(newPlayers));
+      newPlayers.forEach.call(this, addPlayer);
+    }
+    return this;
+  };
+
+  Game.prototype.readyPlayers = function readyPlayers(playerIDs) {
+    playerIDs.forEach.call(this, setPlayerReady);
+    return this;
+  };
+
+  window.Game = Game;
+})();

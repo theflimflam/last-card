@@ -1,4 +1,4 @@
-/* global $, window, util, Game, Q */
+/* global $, window, util, Game */
 /* eslint-disable no-console */
 
 //= require jquery
@@ -6,8 +6,6 @@
 //= require turbolinks
 //= require_tree .
 
-//////////////////////////////////////////
-// Utility functions
 function last(list) {
   return list.slice(-1)[0];
 }
@@ -20,52 +18,75 @@ function getPlayerJSON(id) {
   return $.getJSON(document.location + '/players/' + id);
 }
 
-function lastID() {
-  return last(this).id;
+function signalReady() {
+  return $.ajax({
+    url:    document.location,
+    method: 'put',
+    data:   { ready: true }
+  });
 }
 
 var pollGameState = (function() {
-  var params = {};
-
   function updateParams(actionsJSON) {
     if ( actionsJSON.length > 0 ) {
-      params.since = lastID.call(actionsJSON);
+      this.since = last(actionsJSON).id;
     }
   }
 
-  return function pollGameState() {
-    var donePromise = getActionsJSON(params);
-    donePromise.then(updateParams);
+  return function pollGameState(game) {
+    var donePromise = getActionsJSON(game.currState);
+    donePromise.then(updateParams.bind(game.currState));
     return donePromise;
   };
 })();
 
-//////////////////////////////////////////
-// Game run loop wazzit
 $(document).ready(function initScripts() {
-  setInterval(run, 1000);
-
-  var game = new Game();
+  var game = null;
 
   function run() {
-    pollGameState()
-      .then(update)
-    ;
+    game = currentGame();
+    if (game) {
+      pollGameState(game).then(update);
+    }
+  }
+
+  function currentGame() {
+    var match = document.location.pathname.match(/^\/games\/\d+/);
+    if (!match) {
+      this.game = null;
+    }
+    else {
+      this.game = this.game || new Game();
+    }
+
+    return this.game;
   }
 
   function update(actions) {
     updatePlayers(actions);
-
-    // Game started?
-    util.filterEffect('game_start');
-    console.log('game started: %s', actions.length > 0);
+    updateGameStarted(actions);
   }
 
   function updatePlayers(actions) {
-    var addPlayers  = game.addPlayers.bind(Game);
-    var joinActions = util.filterEffect('join')(actions);
-    var newIDs      = joinActions.map(util.parameter('player_id'));
-    var xhrPromises = newIDs.map(getPlayerJSON);
-    Promise.all(xhrPromises).then(addPlayers);
+    // Join new players
+    var addPlayers    = game.addPlayers.bind(game);
+    var newIDs        = actions.filter(util.effect('join')).map(util.parameter('player_id'));
+    var xhrPlayerJSON = newIDs.map(getPlayerJSON);
+    Promise.all(xhrPlayerJSON).then(addPlayers);
+
+    // Mark players as ready
+    var readyIDs = actions.filter(util.effect('ready')).map(util.parameter('player_id'));
+    game.readyPlayers(readyIDs);
   }
+
+  function updateGameStarted(actions) {
+    var setStarted = actions.filter(util.effect('start_game')).length > 0;
+    if ( setStarted ) {
+      game.started = true;
+    }
+  }
+
+  // Poor man's updates
+  setInterval(run, 1500);
+  run();
 });
