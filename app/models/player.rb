@@ -21,10 +21,8 @@ class Player < ActiveRecord::Base
     shuffles.create!
   end
 
-  def end_turn!
-    with_lock do
-      actions.create!(effect: Action::END_TURN)
-    end
+  def set_turn!
+    actions.create!(effect: Action::SET_TURN)
   end
 
   def ready!

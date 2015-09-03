@@ -2,7 +2,7 @@ class Action < ActiveRecord::Base
   PICKUP     = 'pickup'
   PLAY       = 'play'
   SHUFFLE    = 'shuffle'
-  END_TURN   = 'end_turn'
+  SET_TURN   = 'set_turn'
   START_GAME = 'start_game'
   JOIN       = 'join'
   READY      = 'ready'
@@ -16,14 +16,14 @@ class Action < ActiveRecord::Base
   scope :pickups,  -> { where(effect: PICKUP) }
   scope :plays,    -> { where(effect: PLAY) }
   scope :shuffles, -> { where(effect: SHUFFLE) }
-  scope :turns,    -> { where(effect: END_TURN) }
+  scope :turns,    -> { where(effect: SET_TURN) }
 
   scope :since, ->(id) { where('actions.id > ?', id) }
 
   scope :in_order, -> { order(:id) }
 
   validates :player, presence: true
-  validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE, START_GAME, END_TURN, READY, JOIN ] }
+  validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE, START_GAME, SET_TURN, READY, JOIN ] }
 
   validates :card_suit, inclusion: { in: Card::SUITS }, if: :pickup_or_play?
   validates :card_rank, inclusion: { in: Card::RANKS }, if: :pickup_or_play?

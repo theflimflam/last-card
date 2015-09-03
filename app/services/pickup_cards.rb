@@ -35,7 +35,7 @@ class PickupCards < Struct.new(:player, :round, :number_of_pickups)
   end
 
   def end_turn!
-    player.end_turn!
+    round.next_player.set_turn!
     round.game.save!
   end
 

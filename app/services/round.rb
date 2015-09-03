@@ -1,5 +1,5 @@
 class Round < Struct.new(:game)
-  delegate :plays, :pickups, :shuffles, :players, to: :game
+  delegate :plays, :pickups, :shuffles, :players, :next_player, to: :game
 
   def hands
     @hands ||= prepare_hands
