@@ -66,8 +66,14 @@ RSpec.describe Game, type: :model do
       end
 
       describe "#current_player" do
-        it "returns players" do
-          expect(game.current_player).to be_instance_of Player
+        it "reutrns current player" do
+          expect(game.current_player).to be player1
+        end
+      end
+
+      describe "#next_player" do
+        it "returns the next player" do
+          expect(game.next_player).to be player2
         end
       end
     end

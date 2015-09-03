@@ -19,7 +19,20 @@ class Game < ActiveRecord::Base
   end
 
   def current_player
-    turn_counter = actions.turns.count
-    players[turn_counter % players.count]
+    player_turn(count_turns)
+  end
+
+  def next_player
+    player_turn(count_turns + 1)
+  end
+
+  private
+
+  def count_turns
+    actions.turns.count
+  end
+
+  def player_turn(offset)
+    players[offset % players.count]
   end
 end
