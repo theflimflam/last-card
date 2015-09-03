@@ -122,10 +122,8 @@ RSpec.describe GamesController, type: :controller do
             expect { subject }.to change { game.reload.pending? }.from(true).to(false)
           end
 
-          it "creates Action::START_GAME" do
-            expect { subject }
-              .to change { game.reload.actions.where(effect: Action::START_GAME).count }
-              .from(0).to(1)
+          it "sets game#started?" do
+            expect { subject }.to change { game.reload.started? }.to(true)
           end
         end
       end

@@ -29,9 +29,8 @@ RSpec.describe StartGame do
         second_service.call or raise "need to start game to test a second starting"
       end
 
-      it "doesn't create new START_GAME actions" do
-        expect { service.call }
-          .to_not change { game.actions.where(effect: Action::START_GAME).count }
+      it "doesn't affect game#ready?" do
+        expect { service.call }.to_not change { game.ready? }.from(true)
       end
 
       it_behaves_like "a service with errors"
@@ -55,13 +54,7 @@ RSpec.describe StartGame do
       end
 
       it "is no longer #pending" do
-        expect { subject }.to change { game.pending }.from(true).to(false)
-      end
-
-      it "creates a START_GAME action" do
-        expect { subject }
-          .to change { game.actions.where(effect: Action::START_GAME).count }
-          .by 1
+        expect { subject }.to change { game.pending }.to(false)
       end
 
       it "deals cards to users" do

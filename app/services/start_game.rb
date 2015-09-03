@@ -24,9 +24,7 @@ class StartGame
     elsif !@game.pending
       @errors.push "game already started"
     else
-      # TODO remove pending from game
       @game.update!(pending: false)
-      dealer.actions.create!(effect: Action::START_GAME)
     end
   end
 
