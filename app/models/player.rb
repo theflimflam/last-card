@@ -24,16 +24,4 @@ class Player < ActiveRecord::Base
   def set_turn!
     actions.create!(effect: Action::SET_TURN)
   end
-
-  def ready!
-    with_lock do
-      if !ready?
-        actions.create!(effect: Action::READY)
-      end
-    end
-  end
-
-  def ready?
-    actions.where(effect: Action::READY).count > 0
-  end
 end

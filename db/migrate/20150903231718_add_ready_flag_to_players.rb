@@ -1,5 +1,5 @@
 class AddReadyFlagToPlayers < ActiveRecord::Migration
   def change
-    add_column :players, :ready, :boolean, null: false, default: false
+    add_column :players, :ready, :boolean, default: false, null: false
   end
 end

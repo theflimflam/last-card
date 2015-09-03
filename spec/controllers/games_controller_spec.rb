@@ -66,12 +66,6 @@ RSpec.describe GamesController, type: :controller do
         expect(response).to render_template('show')
       end
 
-      it "publishes a JOIN action" do
-        expect { subject }
-          .to change { Action.where(effect: Action::JOIN).count }
-          .by 1
-      end
-
       it "created a new player" do
         expect { subject }.to change { Player.count }.by 1
       end
@@ -113,18 +107,16 @@ RSpec.describe GamesController, type: :controller do
           expect(game).to be_ready
         end
 
-        it "creates ready action on post" do
-          expect { subject }
-            .to change { player.actions.where(effect: Action::READY).count }
-            .from(0).to(1)
+        it "updates player ready flag on post" do
+          expect { subject }.to change { player.reload.ready }.from(false).to(true)
         end
 
         it "doesn't affect other player's readyness on post" do
-          expect { subject }.to_not change { oponent.actions.where(effect: Action::READY).count }
+          expect { subject }.to_not change { oponent.reload.ready }.from(false)
         end
 
         context "when both players are ready" do
-          before { oponent.ready! }
+          before { oponent.update!(ready: true) }
 
           it "removes game pending flag" do
             expect { subject }.to change { game.reload.pending? }.from(true).to(false)

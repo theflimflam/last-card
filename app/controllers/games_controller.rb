@@ -20,7 +20,7 @@ class GamesController < ApplicationController
   def update
     # TODO security risk?
     if params[:ready]
-      find_or_create_player.ready!
+      find_or_create_player.update!(ready: true)
 
       if game.ready? && game.players.map(&:ready?).all?
         if !start_game.call
@@ -39,14 +39,7 @@ class GamesController < ApplicationController
   end
 
   def find_or_create_player
-    @player ||= game.players.find_by(user: @user)
-    @player ||= create_player
-  end
-
-  def create_player
-    player = game.players.create!(user: @user)
-    player.actions.create!(effect: Action::JOIN)
-    player
+    @player ||= game.players.find_or_create_by(user: @user)
   end
 
   def lookup_user
