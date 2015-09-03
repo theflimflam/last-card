@@ -11,9 +11,7 @@ Rails.application.routes.draw do
   end
 
   resources :games do
-    resources :pickups
-    resources :rounds
-    resources :players
-    resources :actions, only: :index
+    get 'state', to: 'states#index'
+    resources :pickups, :actions
   end
 end
