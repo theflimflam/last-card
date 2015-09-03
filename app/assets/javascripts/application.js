@@ -1,92 +1,83 @@
-/* global $, window, util, Game */
+/* global d3, $, window, util */
 /* eslint-disable no-console */
 
 //= require jquery
 //= require jquery_ujs
-//= require turbolinks
 //= require_tree .
 
 function last(list) {
   return list.slice(-1)[0];
 }
 
+var keyByID = util.parameter('id');
+
 function getActionsJSON(params) {
   return $.getJSON(document.location + '/actions', params);
 }
 
-function getPlayerJSON(id) {
-  return $.getJSON(document.location + '/players/' + id);
-}
+//function getPlayerJSON(id) {
+//  return $.getJSON(document.location + '/players/' + id);
+//}
 
-function signalReady() {
-  return $.ajax({
-    url:    document.location,
-    method: 'put',
-    data:   { ready: true }
-  });
-}
+// function signalReady() {
+//   return $.ajax({
+//     url:    document.location,
+//     method: 'put',
+//     data:   { ready: true }
+//   });
+// }
 
 var pollGameState = (function() {
-  function updateParams(actionsJSON) {
-    if ( actionsJSON.length > 0 ) {
-      this.since = last(actionsJSON).id;
+  var state = [];
+
+  function sinceLastAction() {
+    if ( state.length > 0 ) {
+      return { since: last(state).id };
     }
   }
 
-  return function pollGameState(game) {
-    var donePromise = getActionsJSON(game.currState);
-    donePromise.then(updateParams.bind(game.currState));
-    return donePromise;
+  function updateCache(newState) {
+    state = state.concat(newState);
+    return state;
+  }
+
+  return function pollGameState() {
+    return getActionsJSON(sinceLastAction())
+      .then(updateCache);
   };
 })();
 
 $(document).ready(function initScripts() {
   var game = null;
-
-  function run() {
-    game = currentGame();
-    if (game) {
-      pollGameState(game).then(update);
-    }
-  }
-
-  function currentGame() {
-    var match = document.location.pathname.match(/^\/games\/\d+/);
-    if (!match) {
-      this.game = null;
-    }
-    else {
-      this.game = this.game || new Game();
-    }
-
-    return this.game;
-  }
-
-  function update(actions) {
-    updatePlayers(actions);
-    updateGameStarted(actions);
-  }
-
-  function updatePlayers(actions) {
-    // Join new players
-    var addPlayers    = game.addPlayers.bind(game);
-    var newIDs        = actions.filter(util.effect('join')).map(util.parameter('player_id'));
-    var xhrPlayerJSON = newIDs.map(getPlayerJSON);
-    Promise.all(xhrPlayerJSON).then(addPlayers);
-
-    // Mark players as ready
-    var readyIDs = actions.filter(util.effect('ready')).map(util.parameter('player_id'));
-    game.readyPlayers(readyIDs);
-  }
-
-  function updateGameStarted(actions) {
-    var setStarted = actions.filter(util.effect('start_game')).length > 0;
-    if ( setStarted ) {
-      game.started = true;
-    }
-  }
+  var svg = d3.select('svg');
 
   // Poor man's updates
-  setInterval(run, 1500);
+  // setInterval(run, 1500);
   run();
+
+  function run() {
+    pollGameState(game)
+      .then(renderPlayers)
+      .then(renderLobyControls)
+      .then(renderCards)
+    ;
+  }
+
+  function renderPlayers(actions) {
+    typeof actions;
+    var joins = actions.filter(util.effect('join'));
+    var players = svg.selectAll('.player').data(joins, keyByID);
+
+    players.enter()
+      .append('rect').classed('player',true);
+  };
+
+  function renderLobyControls(actions) {
+    // TODO stub.
+  }
+
+
+  function renderCards(actions) {
+    // TODO stub.
+  }
 });
