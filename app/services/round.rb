@@ -1,16 +1,18 @@
+# todo move to presenters
+# todo move calculate_* to services
 class Round < Struct.new(:game)
   delegate :plays, :pickups, :shuffles, :players, :next_player, to: :game
 
   def hands
-    @hands ||= prepare_hands
+    @hands ||= calculate_hands
   end
 
   def pile
-    @pile ||= Pile.new(prepare_shuffled_pile)
+    @pile ||= Pile.new(calculate_pile)
   end
 
   def deck
-    @deck ||= Deck.new(prepare_deck)
+    @deck ||= Deck.new(calculate_deck)
   end
 
   def reset
@@ -20,13 +22,7 @@ class Round < Struct.new(:game)
 
   private
 
-  # FIXME 52 pickups is fine for the first shuffle
-  # But subsequent pickups will trigger from running through the deck height
-  # which will not be 52 the second time
-  # If the deck is size 20 after the first shuffle
-  # the second shuffle will be at 72 pickups!
-  # TODO don't say shuffle!
-  def prepare_shuffled_pile
+  def calculate_pile
     shuffle_count = shuffles.count
 
     if shuffle_count.zero?
@@ -64,11 +60,11 @@ class Round < Struct.new(:game)
   # 2. Remove pickups
   #   ...try make this work with scopes
   #   ...do add indexes to make this fast
-  def prepare_deck
+  def calculate_deck
     Deck::PLATONIC - cards_in_play
   end
 
-  def prepare_hands
+  def calculate_hands
     players.each.with_object({}) do |player, hands|
       pickup_cards = player.pickups.map(&:card)
       play_cards = player.plays.map(&:card)
