@@ -1,23 +1,9 @@
-/* global d3, $, window, util */
+/* global d3, $, window */
 /* eslint-disable no-console */
 
 //= require jquery
 //= require jquery_ujs
 //= require_tree .
-
-function last(list) {
-  return list.slice(-1)[0];
-}
-
-var keyByID = util.parameter('id');
-
-function getActionsJSON(params) {
-  return $.getJSON(document.location + '/actions', params);
-}
-
-//function getPlayerJSON(id) {
-//  return $.getJSON(document.location + '/players/' + id);
-//}
 
 // function signalReady() {
 //   return $.ajax({
@@ -27,57 +13,94 @@ function getActionsJSON(params) {
 //   });
 // }
 
-var pollGameState = (function() {
-  var state = [];
+// var pollActions = (function() {
+//   var state = [];
 
-  function sinceLastAction() {
-    if ( state.length > 0 ) {
-      return { since: last(state).id };
-    }
-  }
+//   function sinceLastAction() {
+//     if ( state.length > 0 ) {
+//       return { since: last(state).id };
+//     }
+//   }
 
-  function updateCache(newState) {
-    state = state.concat(newState);
-    return state;
-  }
+//   function updateCache(newState) {
+//     state = state.concat(newState);
+//     return state;
+//   }
 
-  return function pollGameState() {
-    return getActionsJSON(sinceLastAction())
-      .then(updateCache);
-  };
-})();
+//   return function pollActions() {
+//     return getActionsJSON(sinceLastAction())
+//       .then(updateCache);
+//   };
+// })();
+
+// function last(list) {
+//   return list.slice(-1)[0];
+// }
+
+// function getActionsJSON(params) {
+//   return $.getJSON(document.location + '/actions', params);
+// }
+
+function getGameState() {
+  return $.getJSON(document.location + '/state');
+}
+
+function keyedByCard(card) {
+  return [card.rank, card.suit].join(',');
+}
+
+function cardFace(card) {
+  return card.image;
+}
 
 $(document).ready(function initScripts() {
+  var CARD_HEIGHT = 150;
+  var CARD_WIDTH = 100;
+
+  var path = document.location.pathname;
+  var gamePage = RegExp('^/games/\\d+');
+
+  if (!path.match(gamePage)) {
+    return new Error('only runs on game pages');
+  }
+
   var game = null;
   var svg = d3.select('svg');
 
   // Poor man's updates
-  // setInterval(run, 1500);
+  setInterval(run, 1500);
   run();
 
   function run() {
-    pollGameState(game)
-      .then(renderPlayers)
-      .then(renderLobyControls)
-      .then(renderCards)
+    var gameStatePromise = getGameState(game);
+    gameStatePromise.then(renderDeck);
+    gameStatePromise.then(renderPlayers);
+  }
+
+  function renderDeck(state) {
+    var cards = svg.selectAll('.card').data(state.deck, keyedByCard);
+
+    cards.enter()
+      .append('image').classed('card', true)
+        .attr('xlink:href', cardFace)
+        .attr('height', CARD_HEIGHT)
+        .attr('width', CARD_WIDTH)
     ;
+
+    cards.attr('transform', positionDeck(cards));
   }
 
-  function renderPlayers(actions) {
-    typeof actions;
-    var joins = actions.filter(util.effect('join'));
-    var players = svg.selectAll('.player').data(joins, keyByID);
-
-    players.enter()
-      .append('rect').classed('player',true);
-  };
-
-  function renderLobyControls(actions) {
-    // TODO stub.
+  function renderPlayers(state) {
+    // TODO
+    console.log(state);
   }
 
-
-  function renderCards(actions) {
-    // TODO stub.
+  function positionDeck() {
+    return function(c, offset) {
+      var position = 'translate(50,0)';
+      var stack = 'translate(' + offset + ',' + offset + ')';
+      var perspective = 'skewX(-10) skewY(10)';
+      return [position, stack, perspective].join(' ');
+    };
   }
 });
