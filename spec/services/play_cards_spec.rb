@@ -53,6 +53,10 @@ RSpec.describe PlayCards do
           expect(service.call).to eq true
         end
 
+        it "has no errors" do
+          expect { service.call }.to_not change { service.errors }
+        end
+
         it "add card to pile" do
           expect { service.call }.to change { round.pile.top }.to card
         end
@@ -86,6 +90,17 @@ RSpec.describe PlayCards do
         end
 
         it_behaves_like "a service with errors"
+      end
+    end
+
+    context "when called with cards not in player's hand" do
+      let(:cards_you_dont_have) { Deck::PLATONIC - hand }
+      let(:cards) { cards_you_dont_have.slice(0,1) }
+
+      it_behaves_like "a service with errors"
+
+      it "describes cheating" do
+        expect { service.call }.to change { service.errors }.to include(/cheat/)
       end
     end
   end

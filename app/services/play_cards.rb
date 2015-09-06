@@ -19,6 +19,8 @@ class PlayCards < Struct.new(:player, :round, :cards)
   def check_legal_move
     if cards.count == 0
       errors.push "need to specify cards to play when calling play cards"
+    elsif cards_not_in_hand?
+      errors.push "don't cheat, you don't have those cards"
     elsif cant_play_on_pile?
       errors.push "cannot play card #{cards.first} on #{round.pile.top}"
     elsif cards_of_different_rank?
@@ -41,5 +43,17 @@ class PlayCards < Struct.new(:player, :round, :cards)
 
   def cant_play_on_pile?
     !cards.first.playable_on?(round.pile.top)
+  end
+
+  def cards_not_in_hand?
+    !cards_in_hand?
+  end
+
+  def cards_in_hand?
+    Set.new(cards).subset? Set.new(hand)
+  end
+
+  def hand
+    round.hands[player.id]
   end
 end
