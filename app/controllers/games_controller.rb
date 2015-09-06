@@ -50,7 +50,7 @@ class GamesController < ApplicationController
       @user ||= User.find(session[:user_id])
     end
   rescue ActiveRecord::RecordNotFound
-    redirect_to 'sessions#destroy'
+    redirect_to '/logout'
   end
 
   def start_game!
