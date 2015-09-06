@@ -18,21 +18,24 @@ class GamesController < ApplicationController
   end
 
   def update
-    # TODO security risk?
-    if params[:ready]
-      find_or_create_player.update!(ready: true)
+    update_player_readyness!
 
-      if game.ready? && game.players.map(&:ready?).all?
-        if !start_game.call
-          raise "Game failed to start: #{start_game.errors.to_sentence}"
-        end
-      end
-    end
+    start_game! if game_can_start?
 
     render_success
   end
 
   private
+
+  def update_player_readyness!
+    if player_ready?
+      find_or_create_player.update!(ready: true)
+    end
+  end
+
+  def game_can_start?
+    game.ready? && game.players.map(&:ready?).all?
+  end
 
   def game
     @game ||= Game.find(params[:id])
@@ -50,7 +53,15 @@ class GamesController < ApplicationController
     redirect_to 'sessions#destroy'
   end
 
-  def start_game
-    @start_game ||= StartGame.new(game)
+  def start_game!
+    service = StartGame.new(game)
+    if !service.call
+      raise "Game failed to start: #{service.errors.to_sentence}"
+    end
+  end
+
+  def player_ready?
+    # TODO security risk?
+    params[:ready]
   end
 end
