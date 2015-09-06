@@ -3,6 +3,8 @@ class Action < ActiveRecord::Base
   PLAY       = 'play'
   SHUFFLE    = 'shuffle'
   SET_TURN   = 'set_turn'
+  LAST_CARD  = 'last_card'
+  WINNER     = 'winner'
 
   belongs_to :player
 

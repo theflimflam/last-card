@@ -18,13 +18,6 @@ class Hand < Array
     self # chainable
   end
 
-  def play_cards!(player, cards)
-    cards.each do |card|
-      player.play!(card)
-      delete card
-    end
-  end
-
   def last_card?
     # Declared if we're 1 move away from winning
     map(&:rank).uniq.count == 1

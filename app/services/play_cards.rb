@@ -7,7 +7,17 @@ class PlayCards < Struct.new(:player, :round, :cards)
     round.game.with_lock do
       check_legal_move
 
-      play_cards! && increment_round! if errors.none?
+      if errors.none?
+        play_cards!
+
+        if player_won?
+          player.end_game!
+        elsif is_last_card?
+          player.last_card!
+        else
+          end_turn!
+        end
+      end
     end
 
     errors.none?
@@ -28,11 +38,23 @@ class PlayCards < Struct.new(:player, :round, :cards)
     end
   end
 
+  def player_hand
+    round.hands[player.id]
+  end
+
   def play_cards!
     cards.each { |card| player.play!(card) }
   end
 
-  def increment_round!
+  def last_card!
+    player.last_card!
+  end
+
+  def player_won?
+    player_hand.count == 0
+  end
+
+  def end_turn!
     round.next_player.set_turn!
     round.game.save!
   end
@@ -55,5 +77,9 @@ class PlayCards < Struct.new(:player, :round, :cards)
 
   def hand
     round.hands[player.id]
+  end
+
+  def is_last_card?
+    player_hand.without(cards).last_card?
   end
 end

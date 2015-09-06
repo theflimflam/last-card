@@ -24,4 +24,8 @@ class Player < ActiveRecord::Base
   def set_turn!
     actions.create!(effect: Action::SET_TURN)
   end
+
+  def last_card!(card)
+    actions.create!(effect: Action::LAST_CARD)
+  end
 end
