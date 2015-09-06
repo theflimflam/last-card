@@ -95,4 +95,43 @@ RSpec.describe Hand do
       end
     end
   end
+
+  describe "#without" do
+    RSpec::Matchers.define_negated_matcher :to_not_include, :include
+
+    let(:missing_card) { cards.last }
+    subject { hand.without([missing_card]) }
+
+    it "removes cards from the hand" do
+      expect { subject }.to change { hand }.to(to_not_include missing_card)
+    end
+
+    it "is chainable" do
+      expect(subject).to be_a(Hand)
+    end
+  end
+
+  describe "#last_card?" do
+    context "with cards of same rank" do
+      let(:cards) do
+        [ Card.new('queen','hearts'),
+          Card.new('queen','diamonds') ]
+      end
+
+      it "is #last_card?" do
+        expect(hand).to be_last_card
+      end
+    end
+
+    context "with cards of different rank" do
+      let(:cards) do
+        [ Card.new('jack','diamonds'),
+          Card.new('queen','diamonds') ]
+      end
+
+      it "is #last_card?" do
+        expect(hand).to_not be_last_card
+      end
+    end
+  end
 end
