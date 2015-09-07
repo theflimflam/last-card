@@ -5,9 +5,11 @@
 //= require jquery_ujs
 //= require_tree .
 
-function last(list) {
-  return list.slice(-1)[0];
-}
+window.table = d3.select('svg#table');
+
+function last(list)        { return list.slice(-1)[0]; }
+function keyedByCard(card) { return [card.rank, card.suit].join(','); }
+function cardFace(card)    { return card.image; }
 
 var cardDimensions = (function(){
   var $svg = $('svg');
@@ -70,20 +72,40 @@ var resource = (function() {
 
 var positionHelpers = (function() {
   var MAX_CARDS = 52;
-  var DECK_SPEAD = cardDimensions.width / 2; // half a card
+  var DECK_SPEAD = cardDimensions.width * 0.5;
+
+  // DECK_SPREAD + cardDimensions.width = 1.5 cards wide
+  function rotateCardAboutCenter(rotation) {
+    return 'rotate(' +
+      rotation + ',' +
+      (cardDimensions.width / 2).toString() + ',' +
+      (cardDimensions.height / 2).toString() +
+    ')';
+  }
+
+  function translate(x,y) {
+    return 'translate(' + x + ',' + ( y || x ) + ')';
+  }
 
   function positionDeck() {
+    var ANGLE               = 10;
+    var CORRECTION_X        = cardDimensions.width * 0.15;
+    var CORRECTION_Y        = cardDimensions.height * 0.08;
+    var PERSPECTIVE         = rotateCardAboutCenter(ANGLE);
+    var CORRECT_PERSPECTIVE = translate(CORRECTION_X, CORRECTION_Y);
+    var POSITION            = translate(cardDimensions.height * 2);
+
     return function(c, i) {
-      var offset = i / MAX_CARDS * DECK_SPEAD; // px
-      var position = 'translate(50,0)';
-      var stack = 'translate(' + offset + ',' + offset + ')';
-      var perspective = 'skewX(-10) skewY(10)';
-      return [position, stack, perspective].join(' ');
+      var height = i / MAX_CARDS * DECK_SPEAD; // px
+      var stack = 'translate(' + height + ',' + height + ')';
+
+      return [POSITION, stack, PERSPECTIVE, CORRECT_PERSPECTIVE].join(' ');
     };
   }
 
   return {
-    deck: positionDeck
+    deck:       positionDeck,
+    rotateCard: rotateCardAboutCenter
   };
 })();
 
@@ -93,41 +115,29 @@ function onGamePage() {
   return !!path.match(gamePage);
 }
 
+function initDeck(state) {
+  var cards = window.table.selectAll('.card').data(state.deck, keyedByCard);
+
+  cards.enter()
+    .append('image').classed('card', true)
+      .attr('xlink:href', cardFace)
+      .attr('height', cardDimensions.height)
+      .attr('width', cardDimensions.width)
+  ;
+
+  cards.attr('transform', positionHelpers.deck(cards));
+}
+
 $(document).ready(function initScripts() {
   if (!onGamePage()) {
     return new Error('this script only to run on game pages');
   }
-
-  function keyedByCard(card) { return [card.rank, card.suit].join(','); }
-  function cardFace(card) { return card.image; }
-
-  var svg = d3.select('svg');
 
   // Poor man's updates
   run();
   setInterval(run, 1500);
 
   function run() {
-    var gameStatePromise = resource.gameState();
-    gameStatePromise.then(renderDeck);
-    gameStatePromise.then(renderPlayers);
-  }
-
-  function renderDeck(state) {
-    var cards = svg.selectAll('.card').data(state.deck, keyedByCard);
-
-    cards.enter()
-      .append('image').classed('card', true)
-        .attr('xlink:href', cardFace)
-        .attr('height', cardDimensions.height)
-        .attr('width', cardDimensions.width)
-    ;
-
-    cards.attr('transform', positionHelpers.deck(cards));
-  }
-
-  function renderPlayers(state) {
-    // TODO
-    console.log(state);
+    resource.gameState().then(initDeck);
   }
 });
