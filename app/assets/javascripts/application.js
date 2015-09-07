@@ -13,7 +13,7 @@ function cardFace(card)    { return card.image; }
 
 var cardDimensions = (function(){
   var $svg = $('svg');
-  var height = Math.min($svg.height(), $svg.width()) / 6;
+  var height = Math.min($svg.height(), $svg.width()) / 8;
   var width = height * (100/150);
 
   return {
