@@ -5,74 +5,83 @@
 //= require jquery_ujs
 //= require_tree .
 
-// function signalReady() {
-//   return $.ajax({
-//     url:    document.location,
-//     method: 'put',
-//     data:   { ready: true }
-//   });
-// }
-
-// var pollActions = (function() {
-//   var state = [];
-
-//   function sinceLastAction() {
-//     if ( state.length > 0 ) {
-//       return { since: last(state).id };
-//     }
-//   }
-
-//   function updateCache(newState) {
-//     state = state.concat(newState);
-//     return state;
-//   }
-
-//   return function pollActions() {
-//     return getActionsJSON(sinceLastAction())
-//       .then(updateCache);
-//   };
-// })();
-
-// function last(list) {
-//   return list.slice(-1)[0];
-// }
-
-// function getActionsJSON(params) {
-//   return $.getJSON(document.location + '/actions', params);
-// }
-
-function getGameState() {
-  return $.getJSON(document.location + '/state');
+function last(list) {
+  return list.slice(-1)[0];
 }
 
-function keyedByCard(card) {
-  return [card.rank, card.suit].join(',');
-}
+var pollActions = (function setupPollActions() {
+  var state = {};
+  var actionsSoFar = [];
 
-function cardFace(card) {
-  return card.image;
+  function pollMethod(params) {
+    return $.getJSON(document.location + '/actions', params);
+  }
+
+  function updateState(actions) {
+    if(actions.length > 0) {
+      state.since = last(actions).id;
+    }
+    return actions;
+  }
+
+  function concatWithActionsSoFar(actions) {
+    actionsSoFar = actionsSoFar.concat(actions);
+    return actionsSoFar;
+  }
+
+  return function pollActions() {
+    return pollMethod(state)
+      .then(updateState)
+      .then(concatWithActionsSoFar)
+    ;
+  };
+})();
+
+var resource = (function() {
+  function gameState(params) {
+    return $.getJSON(document.location + '/state', params);
+  }
+
+  function signalReady() {
+    return $.ajax({
+      url:    document.location,
+      method: 'put',
+      data:   { ready: true }
+    });
+  }
+
+  return {
+    gameState: gameState,
+    actions: pollActions,
+    signalReady: signalReady
+  };
+})();
+
+function onGamePage() {
+  var path = document.location.pathname;
+  var gamePage = RegExp('^/games/\\d+');
+  return !!path.match(gamePage);
 }
 
 $(document).ready(function initScripts() {
+  if (!onGamePage()) {
+    return new Error('this script only to run on game pages');
+  }
+
   var CARD_HEIGHT = 150;
   var CARD_WIDTH = 100;
 
-  var path = document.location.pathname;
-  var gamePage = RegExp('^/games/\\d+');
+  function keyedByCard(card) { return [card.rank, card.suit].join(','); }
+  function cardFace(card) { return card.image; }
 
-  if (!path.match(gamePage)) {
-    return new Error('only runs on game pages');
-  }
-
-  var game = null;
   var svg = d3.select('svg');
 
   // Poor man's updates
-  setInterval(run, 1500);
   run();
+  setInterval(run, 1500);
 
   function run() {
-    var gameStatePromise = getGameState(game);
+    var gameStatePromise = resource.gameState();
     gameStatePromise.then(renderDeck);
     gameStatePromise.then(renderPlayers);
   }
