@@ -7,12 +7,47 @@
 
 var table = d3.select('svg#table');
 
-function cardName(card)     { return [card.rank, card.suit].join(','); }
-function cardFace(card)     { return card.image;                       }
-function objectID(obj)      { return obj.id;                           }
-function playerName(player) { return player.name;                      }
-function findME(player)     { return player.role === 'player';         }
-function ready(player)      { return player.ready;                     }
+function cardName(card)     { return [card.rank, card.suit].join(',');      }
+function cardFace(card)     { return card.image;                            }
+function objectID(obj)      { return obj.id;                                }
+function playerName(player) { return player.name;                           }
+function findME(player)     { return player.role === 'player';              }
+function ready(player)      { return player.ready;                          }
+
+$(document).ready(function initScripts() {
+  if (!onGamePage()) {
+    return new Error('this script only to run on game pages');
+  }
+
+  // Poor man's updates
+  run();
+  setInterval(run, 1000);
+
+  var cache = {};
+  function cacheState(state) {
+    cache.state = state;
+    return state;
+  }
+
+  function gameStarted() {
+    var hasCache = ( typeof cache !== 'undefined' );
+    var hasState = hasCache && ( typeof cache.state !== 'undefined' );
+    return hasState && cache.state.started;
+  }
+
+  function run() {
+    if (!gameStarted()) {
+      Resources.gameState()
+        .then(cacheState)
+        .then(initDeck)
+        .then(updatePlayerReadyness)
+      ;
+    }
+    else {
+      console.log('game has started');
+    }
+  }
+});
 
 function onGamePage() {
   var path = document.location.pathname;
@@ -52,28 +87,3 @@ function updatePlayerReadyness(state) {
 
   players.attr('transform', PositionHelpers.player);
 }
-
-function gameNotStarted() {
-  return true;
-}
-
-$(document).ready(function initScripts() {
-  if (!onGamePage()) {
-    return new Error('this script only to run on game pages');
-  }
-
-  // Poor man's updates
-  run();
-  setInterval(run, 1000);
-
-  function run() {
-    if (gameNotStarted()) {
-      var gameStatePromise = Resources.gameState();
-      gameStatePromise.then(initDeck);
-      gameStatePromise.then(updatePlayerReadyness);
-    }
-    else {
-      console.log('game has started');
-    }
-  }
-});
