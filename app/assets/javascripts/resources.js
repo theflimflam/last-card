@@ -3,7 +3,7 @@ window.Resources = (function() {
   // TODO factor out??
   var pollActions = (function setupPollActions() {
     var state = {};
-    var actionsSoFar = [];
+    // var actionsSoFar = [];
 
     function pollMethod(params) {
       return $.getJSON(document.location + '/actions', params);
@@ -16,15 +16,15 @@ window.Resources = (function() {
       return actions;
     }
 
-    function concatWithActionsSoFar(actions) {
-      actionsSoFar = actionsSoFar.concat(actions);
-      return actionsSoFar;
-    }
+    // function concatWithActionsSoFar(actions) {
+    //   actionsSoFar = actionsSoFar.concat(actions);
+    //   return actionsSoFar;
+    // }
 
     return function pollActions() {
       return pollMethod(state)
         .then(updateState)
-        .then(concatWithActionsSoFar)
+        // .then(concatWithActionsSoFar)
       ;
     };
   })();

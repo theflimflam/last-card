@@ -44,7 +44,12 @@ $(document).ready(function initScripts() {
       ;
     }
     else {
-      console.log('game has started');
+      table.selectAll('.player').remove();
+
+      Resources.actions()
+        .then(pickupCards)
+        .then(playCards)
+      ;
     }
   }
 });
@@ -86,4 +91,11 @@ function updatePlayerReadyness(state) {
   players.filter(ready).selectAll('.ready').text('✔');
 
   players.attr('transform', PositionHelpers.player);
+}
+
+
+function pickupCards(actions) {
+  console.log(actions.map(Util.parameter('effect')));
+}
+function playCards() {
 }
