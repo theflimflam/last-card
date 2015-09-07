@@ -1,12 +1,11 @@
-/* global d3, $, window */
+/* global d3, $, window, Resources, CardDimensions, PositionHelpers */
 /* eslint-disable no-console */
 
 //= require jquery
 //= require jquery_ujs
 //= require_tree .
 
-window.table = d3.select('svg#table');
-function last(list)         { return list.slice(-1)[0]; }
+var table = d3.select('svg#table');
 function cardName(card)     { return [card.rank, card.suit].join(','); }
 function cardFace(card)     { return card.image; }
 function objectID(obj)      { return obj.id; }
@@ -19,133 +18,28 @@ function onGamePage() {
 }
 
 function initDeck(state) {
-  var cards = window.table.selectAll('.card').data(state.deck, cardName);
+  var cards = table.selectAll('.card').data(state.deck, cardName);
 
   cards.enter()
     .append('image').classed('card', true)
       .attr('xlink:href', cardFace)
-      .attr('height', cardDimensions.height)
-      .attr('width', cardDimensions.width)
+      .attr('height', CardDimensions.height)
+      .attr('width', CardDimensions.width)
   ;
 
-  cards.attr('transform', positionHelpers.deck(cards));
+  cards.attr('transform', PositionHelpers.deck(cards));
 }
 
 function updatePlayerReadyness(state) {
-  var players = window.table.selectAll('.player').data(state.players, objectID);
+  var players = table.selectAll('.player').data(state.players, objectID);
 
   players.enter()
     .append('text').classed('player', true)
     .text(playerName)
   ;
 
-  players.attr('transform', positionHelpers.player);
+  players.attr('transform', PositionHelpers.player);
 }
-
-var cardDimensions = (function(){
-  var $svg = $('svg');
-  var height = Math.min($svg.height(), $svg.width()) / 8;
-  var width = height * (100/150);
-
-  return {
-    height: parseInt(height, 10),
-    width: parseInt(width)
-  };
-})();
-
-var pollActions = (function setupPollActions() {
-  var state = {};
-  var actionsSoFar = [];
-
-  function pollMethod(params) {
-    return $.getJSON(document.location + '/actions', params);
-  }
-
-  function updateState(actions) {
-    if(actions.length > 0) {
-      state.since = last(actions).id;
-    }
-    return actions;
-  }
-
-  function concatWithActionsSoFar(actions) {
-    actionsSoFar = actionsSoFar.concat(actions);
-    return actionsSoFar;
-  }
-
-  return function pollActions() {
-    return pollMethod(state)
-      .then(updateState)
-      .then(concatWithActionsSoFar)
-    ;
-  };
-})();
-
-var resource = (function() {
-  function gameState(params) {
-    return $.getJSON(document.location + '/state', params);
-  }
-
-  function signalReady() {
-    return $.ajax({
-      url:    document.location,
-      method: 'put',
-      data:   { ready: true }
-    });
-  }
-
-  return {
-    gameState: gameState,
-    actions: pollActions,
-    signalReady: signalReady
-  };
-})();
-
-var positionHelpers = (function() {
-  var MAX_CARDS = 52;
-  var DECK_SPEAD = cardDimensions.width * 0.5;
-
-  // DECK_SPREAD + cardDimensions.width = 1.5 cards wide
-  function rotateCardAboutCenter(rotation) {
-    return 'rotate(' +
-      rotation + ',' +
-      (cardDimensions.width / 2).toString() + ',' +
-      (cardDimensions.height / 2).toString() +
-    ')';
-  }
-
-  function translate(x,y) {
-    return 'translate(' + x + ',' + ( y || x ) + ')';
-  }
-
-  function positionDeck() {
-    var ANGLE               = 10;
-    var CORRECTION_X        = cardDimensions.width * 0.15;
-    var CORRECTION_Y        = cardDimensions.height * 0.08;
-    var PERSPECTIVE         = rotateCardAboutCenter(ANGLE);
-    var CORRECT_PERSPECTIVE = translate(CORRECTION_X, CORRECTION_Y);
-    var POSITION            = translate(cardDimensions.height * 2);
-
-    return function(c, i) {
-      var height = i / MAX_CARDS * DECK_SPEAD; // px
-      var stack = translate(height, height);
-
-      return [POSITION, stack, PERSPECTIVE, CORRECT_PERSPECTIVE].join(' ');
-    };
-  }
-
-  function positionPlayer(player, i) {
-    var y = cardDimensions.width + i;
-    var x = cardDimensions.height + i;
-    return translate(x,y);
-  }
-
-  return {
-    deck:       positionDeck,
-    player:     positionPlayer,
-    rotateCard: rotateCardAboutCenter
-  };
-})();
 
 $(document).ready(function initScripts() {
   if (!onGamePage()) {
@@ -157,7 +51,7 @@ $(document).ready(function initScripts() {
   setInterval(run, 1500);
 
   function run() {
-    var gameStatePromise = resource.gameState();
+    var gameStatePromise = Resources.gameState();
     gameStatePromise.then(initDeck);
     gameStatePromise.then(updatePlayerReadyness);
   }

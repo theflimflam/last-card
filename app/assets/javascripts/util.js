@@ -1,6 +1,9 @@
 /* global window */
 
-window.util = {
+window.Util = {
+  last: function last(list) {
+    return list.slice(-1)[0];
+  },
   effect: function effect(interesting) {
     return function filterEffect(item) {
       return item.effect === interesting;
