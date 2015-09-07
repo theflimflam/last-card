@@ -6,7 +6,11 @@ class StatesController < ApplicationController
   private
 
   def game_state
-    { deck: deck, players: players }
+    {
+      deck:    deck,
+      players: players,
+      started: game.started?,
+    }
   end
 
   def deck

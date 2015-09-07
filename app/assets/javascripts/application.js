@@ -31,11 +31,12 @@ function initDeck(state) {
   ;
 
   cards.attr('transform', PositionHelpers.deck(cards));
+
+  return state;
 }
 
 function updatePlayerReadyness(state) {
   var players = table.selectAll('.player').data(state.players, objectID);
-  // var players = table.selectAll('.player').data(playa, objectID);
   var newPlayers = players.enter().append('g').classed('player', true);
 
   newPlayers
@@ -44,12 +45,16 @@ function updatePlayerReadyness(state) {
       .text(playerName)
   ;
 
-  newPlayers.filter(findME).attr('fill','orange').on('click', Resources.signalReady);
+  newPlayers.filter(findME).attr('fill','blue').on('click', Resources.signalReady);
 
   newPlayers.append('text').classed('ready',true).text('✖');
   players.filter(ready).selectAll('.ready').text('✔');
 
   players.attr('transform', PositionHelpers.player);
+}
+
+function gameNotStarted() {
+  return true;
 }
 
 $(document).ready(function initScripts() {
@@ -59,11 +64,16 @@ $(document).ready(function initScripts() {
 
   // Poor man's updates
   run();
-  setInterval(run, 1500);
+  setInterval(run, 1000);
 
   function run() {
-    var gameStatePromise = Resources.gameState();
-    gameStatePromise.then(initDeck);
-    gameStatePromise.then(updatePlayerReadyness);
+    if (gameNotStarted()) {
+      var gameStatePromise = Resources.gameState();
+      gameStatePromise.then(initDeck);
+      gameStatePromise.then(updatePlayerReadyness);
+    }
+    else {
+      console.log('game has started');
+    }
   }
 });
