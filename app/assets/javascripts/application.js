@@ -6,10 +6,41 @@
 //= require_tree .
 
 window.table = d3.select('svg#table');
+function last(list)         { return list.slice(-1)[0]; }
+function cardName(card)     { return [card.rank, card.suit].join(','); }
+function cardFace(card)     { return card.image; }
+function objectID(obj)      { return obj.id; }
+function playerName(player) { return player.name; }
 
-function last(list)        { return list.slice(-1)[0]; }
-function keyedByCard(card) { return [card.rank, card.suit].join(','); }
-function cardFace(card)    { return card.image; }
+function onGamePage() {
+  var path = document.location.pathname;
+  var gamePage = RegExp('^/games/\\d+');
+  return !!path.match(gamePage);
+}
+
+function initDeck(state) {
+  var cards = window.table.selectAll('.card').data(state.deck, cardName);
+
+  cards.enter()
+    .append('image').classed('card', true)
+      .attr('xlink:href', cardFace)
+      .attr('height', cardDimensions.height)
+      .attr('width', cardDimensions.width)
+  ;
+
+  cards.attr('transform', positionHelpers.deck(cards));
+}
+
+function updatePlayerReadyness(state) {
+  var players = window.table.selectAll('.player').data(state.players, objectID);
+
+  players.enter()
+    .append('text').classed('player', true)
+    .text(playerName)
+  ;
+
+  players.attr('transform', positionHelpers.player);
+}
 
 var cardDimensions = (function(){
   var $svg = $('svg');
@@ -97,36 +128,24 @@ var positionHelpers = (function() {
 
     return function(c, i) {
       var height = i / MAX_CARDS * DECK_SPEAD; // px
-      var stack = 'translate(' + height + ',' + height + ')';
+      var stack = translate(height, height);
 
       return [POSITION, stack, PERSPECTIVE, CORRECT_PERSPECTIVE].join(' ');
     };
   }
 
+  function positionPlayer(player, i) {
+    var y = cardDimensions.width + i;
+    var x = cardDimensions.height + i;
+    return translate(x,y);
+  }
+
   return {
     deck:       positionDeck,
+    player:     positionPlayer,
     rotateCard: rotateCardAboutCenter
   };
 })();
-
-function onGamePage() {
-  var path = document.location.pathname;
-  var gamePage = RegExp('^/games/\\d+');
-  return !!path.match(gamePage);
-}
-
-function initDeck(state) {
-  var cards = window.table.selectAll('.card').data(state.deck, keyedByCard);
-
-  cards.enter()
-    .append('image').classed('card', true)
-      .attr('xlink:href', cardFace)
-      .attr('height', cardDimensions.height)
-      .attr('width', cardDimensions.width)
-  ;
-
-  cards.attr('transform', positionHelpers.deck(cards));
-}
 
 $(document).ready(function initScripts() {
   if (!onGamePage()) {
@@ -138,6 +157,8 @@ $(document).ready(function initScripts() {
   setInterval(run, 1500);
 
   function run() {
-    resource.gameState().then(initDeck);
+    var gameStatePromise = resource.gameState();
+    gameStatePromise.then(initDeck);
+    gameStatePromise.then(updatePlayerReadyness);
   }
 });
