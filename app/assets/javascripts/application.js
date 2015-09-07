@@ -9,6 +9,17 @@ function last(list) {
   return list.slice(-1)[0];
 }
 
+var cardDimensions = (function(){
+  var $svg = $('svg');
+  var height = Math.min($svg.height(), $svg.width()) / 6;
+  var width = height * (100/150);
+
+  return {
+    height: parseInt(height, 10),
+    width: parseInt(width)
+  };
+})();
+
 var pollActions = (function setupPollActions() {
   var state = {};
   var actionsSoFar = [];
@@ -57,6 +68,25 @@ var resource = (function() {
   };
 })();
 
+var positionHelpers = (function() {
+  var MAX_CARDS = 52;
+  var DECK_SPEAD = cardDimensions.width / 2; // half a card
+
+  function positionDeck() {
+    return function(c, i) {
+      var offset = i / MAX_CARDS * DECK_SPEAD; // px
+      var position = 'translate(50,0)';
+      var stack = 'translate(' + offset + ',' + offset + ')';
+      var perspective = 'skewX(-10) skewY(10)';
+      return [position, stack, perspective].join(' ');
+    };
+  }
+
+  return {
+    deck: positionDeck
+  };
+})();
+
 function onGamePage() {
   var path = document.location.pathname;
   var gamePage = RegExp('^/games/\\d+');
@@ -67,9 +97,6 @@ $(document).ready(function initScripts() {
   if (!onGamePage()) {
     return new Error('this script only to run on game pages');
   }
-
-  var CARD_HEIGHT = 150;
-  var CARD_WIDTH = 100;
 
   function keyedByCard(card) { return [card.rank, card.suit].join(','); }
   function cardFace(card) { return card.image; }
@@ -92,24 +119,15 @@ $(document).ready(function initScripts() {
     cards.enter()
       .append('image').classed('card', true)
         .attr('xlink:href', cardFace)
-        .attr('height', CARD_HEIGHT)
-        .attr('width', CARD_WIDTH)
+        .attr('height', cardDimensions.height)
+        .attr('width', cardDimensions.width)
     ;
 
-    cards.attr('transform', positionDeck(cards));
+    cards.attr('transform', positionHelpers.deck(cards));
   }
 
   function renderPlayers(state) {
     // TODO
     console.log(state);
-  }
-
-  function positionDeck() {
-    return function(c, offset) {
-      var position = 'translate(50,0)';
-      var stack = 'translate(' + offset + ',' + offset + ')';
-      var perspective = 'skewX(-10) skewY(10)';
-      return [position, stack, perspective].join(' ');
-    };
   }
 });
