@@ -22,9 +22,10 @@ class StatesController < ApplicationController
   def players
     game.players.map do |player|
       {
-        id:   player.id,
-        name: player.name,
-        role: user_role(player.user_id),
+        id:    player.id,
+        name:  player.name,
+        role:  user_role(player.user_id),
+        ready: player.ready,
       }
     end
   end

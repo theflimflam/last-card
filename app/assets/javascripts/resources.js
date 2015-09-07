@@ -42,9 +42,8 @@ window.Resources = (function() {
   }
 
   return {
-    gameState: gameState,
-    actions: pollActions,
+    gameState:   gameState,
+    actions:     pollActions,
     signalReady: signalReady
   };
 })();
-

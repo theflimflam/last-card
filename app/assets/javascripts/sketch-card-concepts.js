@@ -1,4 +1,4 @@
-/* global window, $, d3 */
+/* global window, d3 */
 /* eslint-disable no-console */
 
 window.ignition = (function() {
@@ -168,7 +168,6 @@ window.ignition = (function() {
 
   return {
     start: function() {
-      console.log('asdfljafdassadfkajdas');
       d3.json(document.location + '/rounds')
         .header('Content-Type', 'application/json')
         .get(initGame)

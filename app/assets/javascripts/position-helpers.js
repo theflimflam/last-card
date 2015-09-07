@@ -13,7 +13,8 @@ window.PositionHelpers = (function() {
   }
 
   function translate(x,y) {
-    return 'translate(' + x + ',' + ( y || x ) + ')';
+    if (typeof y === 'undefined') { y = x; }
+    return 'translate(' + x + ',' + y + ')';
   }
 
   function positionDeck() {
@@ -32,16 +33,18 @@ window.PositionHelpers = (function() {
     };
   }
 
+  var VERTICAL_SPACING = 20;
+  var HORIZONTAL_OFFSET = CardDimensions.height * 3.5;
+  var VERTICAL_OFFSET = CardDimensions.height * 2;
   function positionPlayer(player, i) {
-    var y = CardDimensions.width + i;
-    var x = CardDimensions.height + i;
-    return translate(x,y);
+    var y = i * VERTICAL_SPACING + VERTICAL_OFFSET;
+    return translate(HORIZONTAL_OFFSET, y);
   }
 
   return {
     deck:       positionDeck,
     player:     positionPlayer,
-    rotateCard: rotateCardAboutCenter
+    rotateCard: rotateCardAboutCenter,
+    translate:  translate
   };
 })();
-

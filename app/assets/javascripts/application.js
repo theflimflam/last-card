@@ -1,4 +1,4 @@
-/* global d3, $, window, Resources, CardDimensions, PositionHelpers */
+/* global d3, $, Resources, CardDimensions, PositionHelpers */
 /* eslint-disable no-console */
 
 //= require jquery
@@ -6,10 +6,13 @@
 //= require_tree .
 
 var table = d3.select('svg#table');
+
 function cardName(card)     { return [card.rank, card.suit].join(','); }
-function cardFace(card)     { return card.image; }
-function objectID(obj)      { return obj.id; }
-function playerName(player) { return player.name; }
+function cardFace(card)     { return card.image;                       }
+function objectID(obj)      { return obj.id;                           }
+function playerName(player) { return player.name;                      }
+function findME(player)     { return player.role === 'player';         }
+function ready(player)      { return player.ready;                     }
 
 function onGamePage() {
   var path = document.location.pathname;
@@ -32,11 +35,19 @@ function initDeck(state) {
 
 function updatePlayerReadyness(state) {
   var players = table.selectAll('.player').data(state.players, objectID);
+  // var players = table.selectAll('.player').data(playa, objectID);
+  var newPlayers = players.enter().append('g').classed('player', true);
 
-  players.enter()
-    .append('text').classed('player', true)
-    .text(playerName)
+  newPlayers
+    .append('text').classed('name',true)
+      .attr('transform', PositionHelpers.translate(20, 0))
+      .text(playerName)
   ;
+
+  newPlayers.filter(findME).attr('fill','orange').on('click', Resources.signalReady);
+
+  newPlayers.append('text').classed('ready',true).text('✖');
+  players.filter(ready).selectAll('.ready').text('✔');
 
   players.attr('transform', PositionHelpers.player);
 }

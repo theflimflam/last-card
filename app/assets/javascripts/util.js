@@ -1,5 +1,4 @@
 /* global window */
-
 window.Util = {
   last: function last(list) {
     return list.slice(-1)[0];
