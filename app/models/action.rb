@@ -24,15 +24,15 @@ class Action < ActiveRecord::Base
   validates :player, presence: true
   validates :effect, inclusion: { in: [ PICKUP, PLAY, SHUFFLE, SET_TURN ] }
 
-  validates :card_suit, inclusion: { in: Card::SUITS }, if: :pickup_or_play?
-  validates :card_rank, inclusion: { in: Card::RANKS }, if: :pickup_or_play?
+  validates :card_suit, inclusion: { in: Card::SUITS }, if: :requires_card?
+  validates :card_rank, inclusion: { in: Card::RANKS }, if: :requires_card?
 
   private
 
   # TODO subclass each of these action types and have specific validations there
   # ...class PickupAction < Action
   # ...class PlayAction < Action
-  def pickup_or_play?
+  def requires_card?
     effect == PICKUP || effect == PLAY
   end
 end
