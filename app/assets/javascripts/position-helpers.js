@@ -6,6 +6,14 @@ window.PositionHelpers = (function() {
   var CARD_WIDTH = CardDimensions.width;
   var TRANSITION_TIME = 750; // ms
 
+  var SEED = new Date().getTime() * Math.random();
+  function seedRandom(seed) {
+    return function myRandom() {
+      var x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+  }
+
   // DECK_SPREAD + CardDimensions.width = 1.5 cards wide
   function rotateCardAboutCenter(rotation) {
     return 'rotate(' +
@@ -26,7 +34,7 @@ window.PositionHelpers = (function() {
     var CORRECTION_Y        = CARD_HEIGHT * 0.08;
     var PERSPECTIVE         = rotateCardAboutCenter(ANGLE);
     var CORRECT_PERSPECTIVE = translate(CORRECTION_X, CORRECTION_Y);
-    var POSITION            = translate(CARD_HEIGHT * 2);
+    var POSITION            = translate(CARD_HEIGHT);
 
     return function(c, i) {
       var height = i / MAX_CARDS * DECK_SPEAD; // px
@@ -37,6 +45,7 @@ window.PositionHelpers = (function() {
   }
 
   function positionHand(cards) {
+    var POSITION = translate(CARD_HEIGHT*3);
     var count = cards[0].length;
     var fanAngle = calculateHandFanAngle(count);
     var startAngle = (fanAngle * count) / 2;
@@ -44,10 +53,9 @@ window.PositionHelpers = (function() {
     return function fanOutCard(card, i) {
       var angle = (i * fanAngle) - startAngle;
       var selectionMultiplier = (card.selected ? -1.2 : -1);
-      var position = 'translate(300,300)';
       var rotate = 'rotate(' + angle + ', ' + (CARD_WIDTH/2) + ', ' + (CARD_HEIGHT/2) + ')';
       var pushOut = 'translate(0,' + (CARD_HEIGHT * selectionMultiplier) + ')';
-      return [position, rotate, pushOut].join(' ');
+      return [POSITION, rotate, pushOut].join(' ');
     };
   }
 
@@ -92,9 +100,21 @@ window.PositionHelpers = (function() {
     };
   }
 
+  function positionPile() {
+    var random = seedRandom(SEED);
+    var POSITION = translate(CARD_HEIGHT*3, 0);
+
+    return function() {
+      var rotation = random() * 180;
+      var rotate = rotateCardAboutCenter(rotation);
+      return [POSITION, rotate].join(' ');
+    };
+  }
+
   return {
     deck:               positionDeck,
     hand:               positionHand,
+    pile:               positionPile,
     player:             positionPlayer,
     rotateCard:         rotateCardAboutCenter,
     transitionFlickOut: transitionFlickOut,

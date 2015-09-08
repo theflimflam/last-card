@@ -72,10 +72,12 @@ function initDeck(state) {
   var cards = table.selectAll('.card').data(state.deck, keyedByCard);
 
   cards.enter()
-    .append('image').classed('card', true)
-      .attr('xlink:href', cardFace)
-      .attr('height', CardDimensions.height)
-      .attr('width', CardDimensions.width)
+    .append('image')
+      .classed('card', true)
+      .classed('in-deck', true)
+        .attr('xlink:href', cardFace)
+        .attr('height', CardDimensions.height)
+        .attr('width', CardDimensions.width)
   ;
 
   cards.attr('transform', PositionHelpers.deck(cards));
@@ -102,16 +104,29 @@ function updatePlayerReadyness(state) {
 }
 
 
-function playCards() {
-}
-
 function pickupCards(actions) {
   var pickupActions = actions.filter(Util.effect('pickup'));
+  var playActions = actions.filter(Util.effect('play'));
+
   var pickups = table.selectAll('.card').data(pickupActions, keyedByCard);
+  var plays = table.selectAll('.card').data(playActions, keyedByCard);
 
   pickups.moveToFront();
+  plays.moveToFront();
+
   table.selectAll('.card').attr('transform', PositionHelpers.deck());
 
   PositionHelpers.transitionFlickOut(pickups)
     .attr('transform', PositionHelpers.hand(pickups));
+
+  PositionHelpers.transitionFlickOut(plays)
+    .attr('transform', PositionHelpers.pile(plays));
+  console.log(plays[0]);
+
+  return actions; // allows chaining
+}
+
+function playCards(actions) {
+  // TODO remove?
+  return actions; // allows chaining
 }
