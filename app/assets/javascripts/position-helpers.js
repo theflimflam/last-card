@@ -4,6 +4,7 @@ window.PositionHelpers = (function() {
   var DECK_SPEAD = CardDimensions.width * 0.5;
   var CARD_HEIGHT = CardDimensions.height;
   var CARD_WIDTH = CardDimensions.width;
+  var TRANSITION_TIME = 750; // ms
 
   // DECK_SPREAD + CardDimensions.width = 1.5 cards wide
   function rotateCardAboutCenter(rotation) {
@@ -74,11 +75,29 @@ window.PositionHelpers = (function() {
     return translate(HORIZONTAL_OFFSET, y);
   }
 
+  function transitionFlickOut(cards) {
+    var cardCount = cards[0].length;
+
+    return cards.transition()
+      .delay(staggeredDelay(TRANSITION_TIME, cardCount)) // stagger transitions over a second
+      .duration(TRANSITION_TIME)                         // transition over 1/2 a second
+      .ease('exp-in-out')                                // as if the user flicked it into the table
+    ;
+  }
+
+  function staggeredDelay(msDelay, itemsCount) {
+    return function myDelay(d, i) {
+      var depth = (itemsCount - i) / itemsCount;
+      return depth * msDelay;
+    };
+  }
+
   return {
-    deck:       positionDeck,
-    hand:       positionHand,
-    player:     positionPlayer,
-    rotateCard: rotateCardAboutCenter,
-    translate:  translate
+    deck:               positionDeck,
+    hand:               positionHand,
+    player:             positionPlayer,
+    rotateCard:         rotateCardAboutCenter,
+    transitionFlickOut: transitionFlickOut,
+    translate:          translate
   };
 })();

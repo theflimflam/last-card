@@ -1,18 +1,25 @@
-/* global d3, $, Resources, CardDimensions, PositionHelpers */
+/* global d3, $, Resources, CardDimensions, PositionHelpers, Util */
 /* eslint-disable no-console */
 
 //= require jquery
 //= require jquery_ujs
 //= require_tree .
-
 var table = d3.select('svg#table');
 
-function cardName(card)     { return [card.rank, card.suit].join(',');      }
-function cardFace(card)     { return card.image;                            }
-function objectID(obj)      { return obj.id;                                }
-function playerName(player) { return player.name;                           }
-function findME(player)     { return player.role === 'player';              }
-function ready(player)      { return player.ready;                          }
+function cardRankSuit(card) {
+  return card.rank && [card.rank, card.suit].join(',');
+}
+function actionRankSuit(action) {
+  return action.card_rank && [action.card_rank, action.card_suit].join(',');
+}
+function keyedByCard(object) {
+  return cardRankSuit(object) || actionRankSuit(object);
+}
+function cardFace(card)     { return card.image;                                     }
+function objectID(obj)      { return obj.id;                                         }
+function playerName(player) { return player.name;                                    }
+function findME(player)     { return player.role === 'player';                       }
+function ready(player)      { return player.ready;                                   }
 
 $(document).ready(function initScripts() {
   if (!onGamePage()) {
@@ -21,13 +28,8 @@ $(document).ready(function initScripts() {
 
   // Poor man's updates
   run();
-  setInterval(run, 1000);
-
-  var cache = {};
-  function cacheState(state) {
-    cache.state = state;
-    return state;
-  }
+  // setInterval(run, 1000);
+  setTimeout(run, 1000);
 
   function gameStarted() {
     var hasCache = ( typeof cache !== 'undefined' );
@@ -54,6 +56,12 @@ $(document).ready(function initScripts() {
   }
 });
 
+var cache = {};
+function cacheState(state) {
+  cache.state = state;
+  return state;
+}
+
 function onGamePage() {
   var path = document.location.pathname;
   var gamePage = RegExp('^/games/\\d+');
@@ -61,7 +69,7 @@ function onGamePage() {
 }
 
 function initDeck(state) {
-  var cards = table.selectAll('.card').data(state.deck, cardName);
+  var cards = table.selectAll('.card').data(state.deck, keyedByCard);
 
   cards.enter()
     .append('image').classed('card', true)
@@ -94,8 +102,13 @@ function updatePlayerReadyness(state) {
 }
 
 
-function pickupCards(actions) {
-  console.log(actions.map(Util.parameter('effect')));
-}
 function playCards() {
+}
+
+function pickupCards(actions) {
+  var pickupActions = actions.filter(Util.effect('pickup'));
+  var pickups = table.selectAll('.card').data(pickupActions, keyedByCard);
+
+  PositionHelpers.transitionFlickOut(pickups)
+    .attr('transform', PositionHelpers.hand(pickups));
 }
