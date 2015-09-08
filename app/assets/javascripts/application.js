@@ -109,6 +109,9 @@ function pickupCards(actions) {
   var pickupActions = actions.filter(Util.effect('pickup'));
   var pickups = table.selectAll('.card').data(pickupActions, keyedByCard);
 
+  pickups.moveToFront();
+  table.selectAll('.card').attr('transform', PositionHelpers.deck());
+
   PositionHelpers.transitionFlickOut(pickups)
     .attr('transform', PositionHelpers.hand(pickups));
 }
