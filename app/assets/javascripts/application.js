@@ -115,7 +115,8 @@ function repositionCards(actions) {
   pickups.classed('in-deck', false).classed('in-hand', true);
   plays.classed('in-hand', false).classed('in-pile', true);
 
-  PositionHelpers.transitionFlickOut(pickups).attr('transform', PositionHelpers.hand(pickups));
+
+  repositionHand();
   PositionHelpers.transitionFlickOut(plays).attr('transform', PositionHelpers.pile(plays));
 
   return actions; // allows chaining
