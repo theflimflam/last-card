@@ -47,11 +47,7 @@ $(document).ready(function initScripts() {
     }
     else {
       table.selectAll('.player').remove();
-
-      Resources.actions()
-        .then(pickupCards)
-        .then(playCards)
-      ;
+      Resources.actions().then(repositionCards);
     }
   }
 });
@@ -78,6 +74,7 @@ function initDeck(state) {
         .attr('xlink:href', cardFace)
         .attr('height', CardDimensions.height)
         .attr('width', CardDimensions.width)
+        .on('click', clickHandler)
   ;
 
   cards.attr('transform', PositionHelpers.deck(cards));
@@ -104,7 +101,7 @@ function updatePlayerReadyness(state) {
 }
 
 
-function pickupCards(actions) {
+function repositionCards(actions) {
   var pickupActions = actions.filter(Util.effect('pickup'));
   var playActions = actions.filter(Util.effect('play'));
 
@@ -114,19 +111,50 @@ function pickupCards(actions) {
   pickups.moveToFront();
   plays.moveToFront();
 
-  table.selectAll('.card').attr('transform', PositionHelpers.deck());
+  table.selectAll('.in-deck').attr('transform', PositionHelpers.deck());
 
-  PositionHelpers.transitionFlickOut(pickups)
-    .attr('transform', PositionHelpers.hand(pickups));
+  pickups.classed('in-deck', false).classed('in-hand', true);
+  plays.classed('in-hand', false).classed('in-pile', true);
 
-  PositionHelpers.transitionFlickOut(plays)
-    .attr('transform', PositionHelpers.pile(plays));
-  console.log(plays[0]);
+  PositionHelpers.transitionFlickOut(pickups).attr('transform', PositionHelpers.hand(pickups));
+  PositionHelpers.transitionFlickOut(plays).attr('transform', PositionHelpers.pile(plays));
 
   return actions; // allows chaining
 }
 
-function playCards(actions) {
-  // TODO remove?
-  return actions; // allows chaining
+var selections = [];
+function clickHandler(card) {
+  console.log('fuuuu');
+  if (typeof card.effect === 'undefined') {
+    // pickup cards
+  }
+  else if (card.effect === 'pickup') {
+    toggleSelection(card);
+  }
+  else {
+    //asdf
+  }
+}
+function toggleSelection(card) {
+  if (card.selected) { resetSelections(); }
+  else { selectCard(card); }
+
+  repositionHand();
+}
+
+function selectCard(card) {
+  card.selected = true;
+  selections.push(card);
+}
+
+function resetSelections() {
+  selections.forEach(function(card) {
+    card.selected = false;
+  });
+  selections = [];
+}
+
+function repositionHand() {
+  var cards = table.selectAll('.in-hand');
+  PositionHelpers.transitionFlickOut(cards).attr('transform', PositionHelpers.hand(cards));
 }
