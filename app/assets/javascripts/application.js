@@ -28,8 +28,7 @@ $(document).ready(function initScripts() {
 
   // Poor man's updates
   run();
-  // setInterval(run, 1000);
-  setTimeout(run, 1000);
+  setInterval(run, 1000);
 
   function gameStarted() {
     var hasCache = ( typeof cache !== 'undefined' );
@@ -124,16 +123,12 @@ function repositionCards(actions) {
 
 var selections = [];
 function clickHandler(card) {
-  console.log('fuuuu');
-  if (typeof card.effect === 'undefined') {
-    // pickup cards
-  }
-  else if (card.effect === 'pickup') {
+  if (typeof card.effect === 'undefined')
+    $.post(document.location + '/pickups'); // TODO tidyup
+  else if (card.effect === 'pickup')
     toggleSelection(card);
-  }
-  else {
-    //asdf
-  }
+  else
+    playCards();
 }
 function toggleSelection(card) {
   if (card.selected) { resetSelections(); }
@@ -157,4 +152,9 @@ function resetSelections() {
 function repositionHand() {
   var cards = table.selectAll('.in-hand');
   PositionHelpers.transitionFlickOut(cards).attr('transform', PositionHelpers.hand(cards));
+}
+
+function playCards() {
+  // TODO
+  console.log('you aught to play', selections);
 }
