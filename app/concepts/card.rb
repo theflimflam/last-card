@@ -37,8 +37,7 @@ class Card < Struct.new(:rank, :suit)
   end
 
   def valid?
-    RANKS.include?(rank) &&
-      SUITS.include?(suit)
+    RANKS.include?(rank) && SUITS.include?(suit)
   end
 
   # TODO chosen_suit when that.rank.wild?
